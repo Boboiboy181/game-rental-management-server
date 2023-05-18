@@ -8,7 +8,7 @@ import { config } from 'process';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { UserSchema } from './schema/users.schemas';
-
+import { User } from './schema/users.schemas';
 
 @Module({
   imports: [
@@ -28,7 +28,7 @@ import { UserSchema } from './schema/users.schemas';
     MongooseModule.forFeature([{ name: 'User', schema: UserSchema }])
   ],
   controllers: [AuthController],
-  providers: [AuthService]
+  providers: [AuthService],
 })
 
 export class AuthModule { }

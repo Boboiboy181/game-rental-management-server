@@ -32,10 +32,10 @@ export class AuthService {
         const { email, password } = loginDto;
         const user = await this.userModel.findOne({ email });
         if (!user) {
-            throw new UnauthorizedException('Nhap sai mat khaur');
+            throw new UnauthorizedException('Nhap sai thong tin');
         }
-        const Match = await bcrypt.compare(password, user.password);
-        if (!Match) {
+        const Matchpass = await bcrypt.compare(password, user.password);
+        if (!Matchpass) {
             throw new UnauthorizedException('Nhap sai mat khaur');
         }
         const token = this.jwtService.sign({ id: user._id })
