@@ -2,7 +2,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { User } from './schema/users.schemas';
-import * as bcrypt from 'bcryptjs';
+import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { SignUpDto } from './dto/signup.dto';
 import { LoginDto } from './dto/login.dto';
@@ -13,7 +13,7 @@ export class AuthService {
     @InjectModel(User.name)
     private userModel: Model<User>,
     private jwtService: JwtService,
-  ) {}
+  ) { }
 
   async signUp(signUpDto: SignUpDto): Promise<{ token: string }> {
     const { username, password } = signUpDto;
@@ -28,14 +28,14 @@ export class AuthService {
   }
 
   async login(loginDto: LoginDto): Promise<{ token: string }> {
-    const { email, password } = loginDto;
-    const user = await this.userModel.findOne({ email });
+    const { username, password } = loginDto;
+    const user = await this.userModel.findOne({ username });
     if (!user) {
       throw new UnauthorizedException('Nhap sai thong tin');
     }
     const Matchpass = await bcrypt.compare(password, user.password);
     if (!Matchpass) {
-      throw new UnauthorizedException('Nhap sai mat khaur');
+      throw new UnauthorizedException('Nhap sai mat khau');
     }
     const token = this.jwtService.sign({ id: user._id });
     return { token };
