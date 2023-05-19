@@ -13,12 +13,12 @@ export class AuthService {
     @InjectModel(User.name)
     private userModel: Model<User>,
     private jwtService: JwtService,
-  ) { }
+  ) {}
 
   async signUp(signUpDto: SignUpDto): Promise<{ token: string }> {
     const { username, password } = signUpDto;
-    const hashedPassword = await bcrypt.hash(password, 10);
-
+    const salt = await bcrypt.genSalt();
+    const hashedPassword = await bcrypt.hash(password, salt);
     const user = await this.userModel.create({
       username,
       password: hashedPassword,
