@@ -1,16 +1,15 @@
-import { IsEmail, IsNotEmpty, IsString, MinLength } from 'class-validator';
+import { IsNotEmpty, IsString, Matches, MinLength } from 'class-validator';
 
 export class SignUpDto {
   @IsNotEmpty()
   @IsString()
-  readonly name: string;
-
-  @IsNotEmpty()
-  @IsEmail({}, { message: 'Dien dung email' })
-  readonly email: string;
+  readonly username: string;
 
   @IsNotEmpty()
   @IsString()
   @MinLength(6)
+  @Matches(/((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/, {
+    message: 'password is too weak',
+  })
   readonly password: string;
 }
