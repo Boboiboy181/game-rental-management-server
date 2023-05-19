@@ -8,7 +8,7 @@ import { InjectModel } from '@nestjs/mongoose';
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
     constructor(
-        @InjectModel(User.name)
+        @InjectModel('User')
         private readonly userModel: Model<User>,
         private readonly configService: ConfigService,
     ) {
@@ -18,9 +18,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         });
     }
 
-    async validate(payload: any): Promise<User> {
-        const { username } = payload;
-        const findUser: User = await this.userModel.find({ username }).exec();
+    async validate(user: User): Promise<User> {
+        const { username } = user;
+        const findUser: User = await this.userModel.findOne({ username }).exec();
         if (!findUser) {
             throw new UnauthorizedException();
         }
