@@ -1,5 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
+import { VideoGameGenreEnum } from '../enums/video-game-genre.enum';
+import { VideoGameSystemEnum } from '../enums/video-game-system.enum';
 
 export type VideoGameDocument = HydratedDocument<VideoGame>;
 
@@ -18,7 +20,7 @@ export class VideoGame {
   manufacture: string;
 
   @Prop()
-  genre: string;
+  genre: VideoGameGenreEnum;
 
   @Prop()
   releaseDate: string;
@@ -27,7 +29,7 @@ export class VideoGame {
   language: string;
 
   @Prop()
-  system: string;
+  system: VideoGameSystemEnum;
 
   @Prop()
   description: string;
