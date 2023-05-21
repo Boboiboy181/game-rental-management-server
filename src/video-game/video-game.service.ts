@@ -1,11 +1,12 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { CreateVideoGameDto } from './dto/create-video-game.dto';
-import { UpdateVideoGameDto } from './dto/update-video-game.dto';
+import { CreateVideoGameDto } from './dtos/create-video-game.dto';
+import { UpdateVideoGameDto } from './dtos/update-video-game.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { VideoGame } from './schemas/video-game.schema';
 import { VideoGameGenreEnum } from './enums/video-game-genre.enum';
 import { VideoGameSystemEnum } from './enums/video-game-system.enum';
+import { FilterVideoGameDto } from './dtos/filter-video-game.dto';
 
 @Injectable()
 export class VideoGameService {
@@ -24,8 +25,27 @@ export class VideoGameService {
     return await videoGame.save();
   }
 
-  findAll() {
-    return `This action returns all videoGame`;
+  async getVideoGames(
+    filterVideoGameDto: FilterVideoGameDto,
+  ): Promise<VideoGame[]> {
+    const { genre, system, manufacture, search } = filterVideoGameDto;
+    const query = this.videoGameModel.find();
+    query.setOptions({ lean: true });
+    if (genre) {
+      query.where({ genre });
+    }
+    if (system) {
+      query.where({ system });
+    }
+    if (manufacture) {
+      query.where({ manufacture });
+    }
+    if (search) {
+      query.where({
+        $or: [{ productName: { $regex: search, $options: 'i' } }],
+      });
+    }
+    return await query.exec();
   }
 
   async getVideoGameById(id: string): Promise<VideoGame> {
