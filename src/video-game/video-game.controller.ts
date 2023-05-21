@@ -6,11 +6,13 @@ import {
   Param,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import { VideoGameService } from './video-game.service';
-import { CreateVideoGameDto } from './dto/create-video-game.dto';
-import { UpdateVideoGameDto } from './dto/update-video-game.dto';
+import { CreateVideoGameDto } from './dtos/create-video-game.dto';
+import { UpdateVideoGameDto } from './dtos/update-video-game.dto';
 import { VideoGame } from './schemas/video-game.schema';
+import { FilterVideoGameDto } from './dtos/filter-video-game.dto';
 
 @Controller('video-game')
 export class VideoGameController {
@@ -22,8 +24,10 @@ export class VideoGameController {
   }
 
   @Get()
-  findAll() {
-    return this.videoGameService.findAll();
+  getVideoGames(
+    @Query() filterVideoGameDto: FilterVideoGameDto,
+  ): Promise<VideoGame[]> {
+    return this.videoGameService.getVideoGames(filterVideoGameDto);
   }
 
   @Get(':id')
