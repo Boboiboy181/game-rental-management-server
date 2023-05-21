@@ -27,8 +27,8 @@ export class VideoGameController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.videoGameService.findOne(+id);
+  getVideoGameById(@Param('id') id: string): Promise<VideoGame> {
+    return this.videoGameService.getVideoGameById(id);
   }
 
   @Patch(':id')

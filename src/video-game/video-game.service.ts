@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateVideoGameDto } from './dto/create-video-game.dto';
 import { UpdateVideoGameDto } from './dto/update-video-game.dto';
 import { InjectModel } from '@nestjs/mongoose';
@@ -28,8 +28,12 @@ export class VideoGameService {
     return `This action returns all videoGame`;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} videoGame`;
+  async getVideoGameById(id: string): Promise<VideoGame> {
+    const result = await this.videoGameModel.findById(id).exec();
+    if (!result) {
+      throw new NotFoundException(`Video game with id ${id} not found`);
+    }
+    return result;
   }
 
   update(id: number, updateVideoGameDto: UpdateVideoGameDto) {
