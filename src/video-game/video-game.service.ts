@@ -4,6 +4,8 @@ import { UpdateVideoGameDto } from './dto/update-video-game.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { VideoGame } from './schemas/video-game.schema';
+import { VideoGameGenreEnum } from './enums/video-game-genre.enum';
+import { VideoGameSystemEnum } from './enums/video-game-system.enum';
 
 @Injectable()
 export class VideoGameService {
@@ -11,8 +13,15 @@ export class VideoGameService {
     @InjectModel('VideoGame') private readonly videoGameModel: Model<VideoGame>,
   ) {}
 
-  create(createVideoGameDto: CreateVideoGameDto) {
-    return 'This action adds a new videoGame';
+  async createVideoGame(
+    createVideoGameDto: CreateVideoGameDto,
+  ): Promise<VideoGame> {
+    const videoGame = new this.videoGameModel({
+      ...createVideoGameDto,
+      system: VideoGameSystemEnum.Default,
+      genre: VideoGameGenreEnum.Default,
+    });
+    return await videoGame.save();
   }
 
   findAll() {

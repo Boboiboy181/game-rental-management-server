@@ -10,14 +10,15 @@ import {
 import { VideoGameService } from './video-game.service';
 import { CreateVideoGameDto } from './dto/create-video-game.dto';
 import { UpdateVideoGameDto } from './dto/update-video-game.dto';
+import { VideoGame } from './schemas/video-game.schema';
 
 @Controller('video-game')
 export class VideoGameController {
   constructor(private readonly videoGameService: VideoGameService) {}
 
   @Post()
-  create(@Body() createVideoGameDto: CreateVideoGameDto) {
-    return this.videoGameService.create(createVideoGameDto);
+  create(@Body() createVideoGameDto: CreateVideoGameDto): Promise<VideoGame> {
+    return this.videoGameService.createVideoGame(createVideoGameDto);
   }
 
   @Get()

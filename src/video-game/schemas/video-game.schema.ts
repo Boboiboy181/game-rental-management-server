@@ -11,9 +11,6 @@ export class VideoGame {
   productName: string;
 
   @Prop()
-  quantity: number;
-
-  @Prop()
   price: number;
 
   @Prop()
