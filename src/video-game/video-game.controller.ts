@@ -13,10 +13,11 @@ import { CreateVideoGameDto } from './dtos/create-video-game.dto';
 import { UpdateVideoGameDto } from './dtos/update-video-game.dto';
 import { VideoGame } from './schemas/video-game.schema';
 import { FilterVideoGameDto } from './dtos/filter-video-game.dto';
+import { DeleteVideoGameDto } from './dtos/delete-video-game.dto';
 
 @Controller('video-game')
 export class VideoGameController {
-  constructor(private readonly videoGameService: VideoGameService) {}
+  constructor(private readonly videoGameService: VideoGameService) { }
 
   @Post()
   create(@Body() createVideoGameDto: CreateVideoGameDto): Promise<VideoGame> {
@@ -44,7 +45,9 @@ export class VideoGameController {
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.videoGameService.remove(+id);
+  deleteVideoGame(@Param('id') gameId: string): Promise<void> {
+    const deleteVideoGameDto = new DeleteVideoGameDto();
+    deleteVideoGameDto.gameId = gameId;
+    return this.videoGameService.deleteVideoGame(deleteVideoGameDto);
   }
 }

@@ -7,12 +7,14 @@ import { VideoGame } from './schemas/video-game.schema';
 import { VideoGameGenreEnum } from './enums/video-game-genre.enum';
 import { VideoGameSystemEnum } from './enums/video-game-system.enum';
 import { FilterVideoGameDto } from './dtos/filter-video-game.dto';
+import { DeleteVideoGameDto } from './dtos/delete-video-game.dto';
+// import { DeleteVideoGameDto } from './dtos/delete-video-game.dto';
 
 @Injectable()
 export class VideoGameService {
   constructor(
     @InjectModel('VideoGame') private readonly videoGameModel: Model<VideoGame>,
-  ) {}
+  ) { }
 
   async createVideoGame(
     createVideoGameDto: CreateVideoGameDto,
@@ -48,6 +50,12 @@ export class VideoGameService {
     return await query.exec();
   }
 
+  async deleteVideoGame(deleteVideoGameDto: DeleteVideoGameDto): Promise<void> {
+    const { gameId } = deleteVideoGameDto;
+    await this.videoGameModel.deleteOne({ _id: gameId }).exec();
+  }
+
+
   async getVideoGameById(id: string): Promise<VideoGame> {
     const result = await this.videoGameModel.findById(id).exec();
     if (!result) {
@@ -61,6 +69,7 @@ export class VideoGameService {
   }
 
   remove(id: number) {
+    this.getVideoGameById
     return `This action removes a #${id} videoGame`;
   }
 }
