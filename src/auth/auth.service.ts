@@ -9,35 +9,35 @@ import { LoginDto } from './dto/login.dto';
 
 @Injectable()
 export class AuthService {
-  constructor(
-    @InjectModel('User')
-    private userModel: Model<User>,
-    private jwtService: JwtService,
-  ) {}
+    constructor(
+        @InjectModel('User')
+        private userModel: Model<User>,
+        private jwtService: JwtService,
+    ) { }
 
-  async signUp(signUpDto: SignUpDto): Promise<{ token: string }> {
-    const { username, password } = signUpDto;
-    const salt = await bcrypt.genSalt();
-    const hashedPassword = await bcrypt.hash(password, salt);
-    const user = await this.userModel.create({
-      username,
-      password: hashedPassword,
-    });
-    const token = this.jwtService.sign({ id: user._id });
-    return { token };
-  }
+    async signUp(signUpDto: SignUpDto): Promise<{ token: string }> {
+        const { username, password } = signUpDto;
+        const salt = await bcrypt.genSalt();
+        const hashedPassword = await bcrypt.hash(password, salt);
+        const user = await this.userModel.create({
+            username,
+            password: hashedPassword,
+        });
+        const token = this.jwtService.sign({ id: user._id });
+        return { token };
+    }
 
-  async login(loginDto: LoginDto): Promise<{ token: string }> {
-    const { username, password } = loginDto;
-    const user = await this.userModel.findOne({ username });
-    if (!user) {
-      throw new UnauthorizedException('Nhap sai thong tin');
+    async login(loginDto: LoginDto): Promise<{ token: string }> {
+        const { username, password } = loginDto;
+        const user = await this.userModel.findOne({ username });
+        if (!user) {
+            throw new UnauthorizedException('Nhap sai thong tin');
+        }
+        const Matchpass = await bcrypt.compare(password, user.password);
+        if (!Matchpass) {
+            throw new UnauthorizedException('Nhap sai mat khau');
+        }
+        const token = this.jwtService.sign({ username: user.username });
+        return { token };
     }
-    const Matchpass = await bcrypt.compare(password, user.password);
-    if (!Matchpass) {
-      throw new UnauthorizedException('Nhap sai mat khau');
-    }
-    const token = this.jwtService.sign({ id: user._id });
-    return { token };
-  }
 }
