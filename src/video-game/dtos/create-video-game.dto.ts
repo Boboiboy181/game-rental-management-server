@@ -1,4 +1,6 @@
+import { Type } from 'class-transformer';
 import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { type } from 'os';
 
 export class CreateVideoGameDto {
   @IsNotEmpty()
@@ -7,6 +9,7 @@ export class CreateVideoGameDto {
 
   @IsNotEmpty()
   @IsNumber()
+  @Type(() => Number)
   price: number;
 
   @IsNotEmpty()
