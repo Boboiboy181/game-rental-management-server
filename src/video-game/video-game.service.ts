@@ -57,6 +57,13 @@ export class VideoGameService {
     await this.videoGameModel.deleteOne({ _id: id }).exec();
   }
 
+  async updateProduct(id: string, updateVideoGameDto: UpdateVideoGameDto) {
+    const updated = await this.videoGameModel.findByIdAndUpdate(id, updateVideoGameDto, { new: true });
+    if (!updated) {
+      throw new NotFoundException('Product not found');
+    }
+    return updated;
+  }
 
   async getVideoGameById(id: string): Promise<VideoGame> {
     const result = await this.videoGameModel.findById(id).exec();
@@ -65,10 +72,4 @@ export class VideoGameService {
     }
     return result;
   }
-
-  update(id: number, updateVideoGameDto: UpdateVideoGameDto) {
-    return `This action updates a #${id} videoGame`;
-  }
-
-
 }

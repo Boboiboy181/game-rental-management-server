@@ -40,9 +40,8 @@ export class VideoGameController {
     @Param('id') id: string,
     @Body() updateVideoGameDto: UpdateVideoGameDto,
   ) {
-    return this.videoGameService.update(+id, updateVideoGameDto);
+    return this.videoGameService.updateProduct(id, updateVideoGameDto);
   }
-
   @Delete(':id')
   async deleteVideoGame(@Param('id') id: string): Promise<void> {
     await this.videoGameService.deleteVideoGame(id);
