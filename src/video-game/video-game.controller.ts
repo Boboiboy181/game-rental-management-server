@@ -16,7 +16,7 @@ import { FilterVideoGameDto } from './dtos/filter-video-game.dto';
 
 @Controller('video-game')
 export class VideoGameController {
-  constructor(private readonly videoGameService: VideoGameService) {}
+  constructor(private readonly videoGameService: VideoGameService) { }
 
   @Post()
   create(@Body() createVideoGameDto: CreateVideoGameDto): Promise<VideoGame> {
@@ -39,7 +39,7 @@ export class VideoGameController {
   update(
     @Param('id') id: string,
     @Body() updateVideoGameDto: UpdateVideoGameDto,
-  ) {
+  ): Promise<VideoGame> {
     return this.videoGameService.updateProduct(id, updateVideoGameDto);
   }
   @Delete(':id')
