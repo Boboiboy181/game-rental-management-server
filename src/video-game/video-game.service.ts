@@ -8,12 +8,11 @@ import { VideoGameGenreEnum } from './enums/video-game-genre.enum';
 import { VideoGameSystemEnum } from './enums/video-game-system.enum';
 import { FilterVideoGameDto } from './dtos/filter-video-game.dto';
 
-
 @Injectable()
 export class VideoGameService {
   constructor(
     @InjectModel('VideoGame') private readonly videoGameModel: Model<VideoGame>,
-  ) { }
+  ) {}
 
   async createVideoGame(
     createVideoGameDto: CreateVideoGameDto,
@@ -58,7 +57,11 @@ export class VideoGameService {
   }
 
   async updateProduct(id: string, updateVideoGameDto: UpdateVideoGameDto) {
-    const updated = await this.videoGameModel.findByIdAndUpdate(id, updateVideoGameDto, { new: true });
+    const updated = await this.videoGameModel.findByIdAndUpdate(
+      id,
+      updateVideoGameDto,
+      { new: true },
+    );
     if (!updated) {
       throw new NotFoundException('Product not found');
     }
