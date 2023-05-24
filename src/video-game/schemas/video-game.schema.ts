@@ -33,6 +33,9 @@ export class VideoGame {
 
   @Prop()
   imageUrl: string[];
+
+  @Prop()
+  slug: string;
 }
 
 export const VideoGameSchema = SchemaFactory.createForClass(VideoGame);

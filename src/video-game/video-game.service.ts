@@ -7,6 +7,7 @@ import { VideoGame } from './schemas/video-game.schema';
 import { VideoGameGenreEnum } from './enums/video-game-genre.enum';
 import { VideoGameSystemEnum } from './enums/video-game-system.enum';
 import { FilterVideoGameDto } from './dtos/filter-video-game.dto';
+import slugify from 'slugify';
 
 @Injectable()
 export class VideoGameService {
@@ -21,6 +22,7 @@ export class VideoGameService {
       ...createVideoGameDto,
       system: VideoGameSystemEnum.Default,
       genre: VideoGameGenreEnum.Default,
+      slug: slugify(createVideoGameDto.productName, { lower: true }),
     });
     return await videoGame.save();
   }
