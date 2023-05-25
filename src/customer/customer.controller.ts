@@ -11,6 +11,7 @@ import { CustomerService } from './customer.service';
 import { CreateCustomerDto } from './dtos/create-customer.dto';
 import { UpdateCustomerDto } from './dtos/update-customer.dto';
 import { Customer } from './schemas/customer.schema';
+import { FilterCustomerDto } from './dtos/filter-customer.dto';
 
 @Controller('customer')
 export class CustomerController {
@@ -22,8 +23,10 @@ export class CustomerController {
   }
 
   @Get()
-  findAll() {
-    return this.customerService.findAll();
+  getCustomers(
+    @Body() filterCustomerDto: FilterCustomerDto,
+  ): Promise<Customer[]> {
+    return this.customerService.getCustomers(filterCustomerDto);
   }
 
   @Get(':id')
