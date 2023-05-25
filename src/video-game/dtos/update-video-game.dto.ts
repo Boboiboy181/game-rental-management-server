@@ -4,11 +4,11 @@ import { IsOptional, IsEnum } from 'class-validator';
 import { VideoGameGenreEnum } from '../enums/video-game-genre.enum';
 import { VideoGameSystemEnum } from '../enums/video-game-system.enum';
 export class UpdateVideoGameDto extends PartialType(CreateVideoGameDto) {
-    @IsOptional()
-    @IsEnum(VideoGameSystemEnum)
-    system?: VideoGameSystemEnum;
+  @IsOptional()
+  @IsEnum(VideoGameSystemEnum)
+  system?: VideoGameSystemEnum;
 
-    @IsOptional()
-    @IsEnum(VideoGameGenreEnum)
-    genre: VideoGameGenreEnum;
+  @IsOptional()
+  @IsEnum(VideoGameGenreEnum)
+  genre: VideoGameGenreEnum;
 }
