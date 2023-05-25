@@ -12,8 +12,4 @@ export class FilterCustomerDto {
   @IsOptional()
   @IsPhoneNumber('VN')
   phoneNumber?: string;
-
-  @IsOptional()
-  @IsString()
-  sort?: string;
 }

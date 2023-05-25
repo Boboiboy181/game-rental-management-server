@@ -20,7 +20,7 @@ export class CustomerService {
   async getCustomers(
     filterCustomerDto: FilterCustomerDto,
   ): Promise<Customer[]> {
-    const { name, email, phoneNumber, sort } = filterCustomerDto;
+    const { name, email, phoneNumber } = filterCustomerDto;
 
     const query = this.customerModel.find();
     query.setOptions({ lean: true });
@@ -32,9 +32,6 @@ export class CustomerService {
     }
     if (phoneNumber) {
       query.where({ phoneNumber: { $regex: phoneNumber, $options: 'i' } });
-    }
-    if (sort) {
-      query.sort(sort);
     }
 
     return await query.exec();
