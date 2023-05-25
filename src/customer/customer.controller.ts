@@ -10,6 +10,7 @@ import {
 import { CustomerService } from './customer.service';
 import { CreateCustomerDto } from './dtos/create-customer.dto';
 import { UpdateCustomerDto } from './dtos/update-customer.dto';
+import { Customer } from './schemas/customer.schema';
 
 @Controller('customer')
 export class CustomerController {
@@ -26,8 +27,8 @@ export class CustomerController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.customerService.findOne(+id);
+  getCustomerById(@Param('id') id: string): Promise<Customer> {
+    return this.customerService.getCustomerById(id);
   }
 
   @Patch(':id')
