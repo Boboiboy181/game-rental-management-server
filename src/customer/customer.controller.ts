@@ -38,12 +38,12 @@ export class CustomerController {
   update(
     @Param('id') id: string,
     @Body() updateCustomerDto: UpdateCustomerDto,
-  ) {
-    return this.customerService.update(+id, updateCustomerDto);
+  ): Promise<Customer> {
+    return this.customerService.updateCustomer(id, updateCustomerDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.customerService.remove(+id);
+  async deleteCustomer(@Param('id') id: string): Promise<void> {
+    await this.customerService.deleteCustomer(id);
   }
 }
