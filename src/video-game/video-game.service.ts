@@ -13,7 +13,7 @@ import slugify from 'slugify';
 export class VideoGameService {
   constructor(
     @InjectModel('VideoGame') private readonly videoGameModel: Model<VideoGame>,
-  ) {}
+  ) { }
 
   async createVideoGame(
     createVideoGameDto: CreateVideoGameDto,
@@ -58,7 +58,7 @@ export class VideoGameService {
     await this.videoGameModel.deleteOne({ _id: id }).exec();
   }
 
-  async updateProduct(id: string, updateVideoGameDto: UpdateVideoGameDto) {
+  async updateProduct(id: string, updateVideoGameDto: UpdateVideoGameDto): Promise<VideoGame> {
     const updated = await this.videoGameModel.findByIdAndUpdate(
       id,
       updateVideoGameDto,
