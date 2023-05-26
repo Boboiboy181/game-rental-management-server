@@ -11,7 +11,7 @@ export class CustomerService {
   constructor(
     @InjectModel('Customer')
     private readonly customerModel: Model<Customer>,
-  ) { }
+  ) {}
 
   async createCustomer(
     createCustomerDto: CreateCustomerDto,
@@ -19,8 +19,8 @@ export class CustomerService {
     const customer = new this.customerModel({
       ...createCustomerDto,
     });
-    customer.point = 0
-    return await customer.save()
+    customer.point = 0;
+    return await customer.save();
   }
 
   async getCustomers(

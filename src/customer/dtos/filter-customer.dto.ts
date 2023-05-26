@@ -1,4 +1,11 @@
-import { IsEmail, IsOptional, IsPhoneNumber, IsString } from 'class-validator';
+import {
+  IsEmail,
+  IsNumberString,
+  IsOptional,
+  IsString,
+  MaxLength,
+  MinLength,
+} from 'class-validator';
 
 export class FilterCustomerDto {
   @IsOptional()
@@ -10,6 +17,8 @@ export class FilterCustomerDto {
   email?: string;
 
   @IsOptional()
-  @IsPhoneNumber('VN')
-  phoneNumber?: string;
+  @IsNumberString()
+  @MaxLength(10)
+  @MinLength(10)
+  phoneNumber?: number;
 }
