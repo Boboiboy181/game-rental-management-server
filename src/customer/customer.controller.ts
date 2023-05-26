@@ -15,11 +15,11 @@ import { FilterCustomerDto } from './dtos/filter-customer.dto';
 
 @Controller('customer')
 export class CustomerController {
-  constructor(private readonly customerService: CustomerService) {}
+  constructor(private readonly customerService: CustomerService) { }
 
   @Post()
-  create(@Body() createCustomerDto: CreateCustomerDto) {
-    return this.customerService.create(createCustomerDto);
+  create(@Body() createCustomerDto: CreateCustomerDto): Promise<Customer> {
+    return this.customerService.createCustomer(createCustomerDto);
   }
 
   @Get()

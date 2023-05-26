@@ -11,10 +11,16 @@ export class CustomerService {
   constructor(
     @InjectModel('Customer')
     private readonly customerModel: Model<Customer>,
-  ) {}
+  ) { }
 
-  create(createCustomerDto: CreateCustomerDto) {
-    return 'This action adds a new customer';
+  async createCustomer(
+    createCustomerDto: CreateCustomerDto,
+  ): Promise<Customer> {
+    const customer = new this.customerModel({
+      ...createCustomerDto,
+    });
+    customer.point = 0
+    return await customer.save()
   }
 
   async getCustomers(
