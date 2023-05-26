@@ -51,11 +51,26 @@ export class CustomerService {
     return result;
   }
 
-  update(id: number, updateCustomerDto: UpdateCustomerDto) {
-    return `This action updates a #${id} customer`;
+  async updateCustomer(
+    id: string,
+    updateCustomerDto: UpdateCustomerDto,
+  ): Promise<Customer> {
+    const updated = await this.customerModel.findByIdAndUpdate(
+      id,
+      updateCustomerDto,
+      { new: true },
+    );
+    if (!updated) {
+      throw new NotFoundException('Customer not found');
+    }
+    return updated;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} customer`;
+  async deleteCustomer(id: string): Promise<void> {
+    const result = await this.getCustomerById(id);
+    if (!result) {
+      throw new NotFoundException(`Customer with id ${id} not found`);
+    }
+    await this.customerModel.deleteOne({ _id: id }).exec();
   }
 }
