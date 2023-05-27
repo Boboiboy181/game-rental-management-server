@@ -4,6 +4,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { configValidationSchema } from './config.schema';
 import { VideoGameModule } from './video-game/video-game.module';
+import { CloudinaryModule } from './cloudinary/cloudinary.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { VideoGameModule } from './video-game/video-game.module';
     }),
     AuthModule,
     VideoGameModule,
+    CloudinaryModule,
   ],
 })
 export class AppModule {}

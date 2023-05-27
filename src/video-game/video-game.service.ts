@@ -17,6 +17,7 @@ export class VideoGameService {
 
   async createVideoGame(
     createVideoGameDto: CreateVideoGameDto,
+    imageUrl: string,
   ): Promise<VideoGame> {
     const videoGame = new this.videoGameModel({
       ...createVideoGameDto,
@@ -24,6 +25,7 @@ export class VideoGameService {
       genre: VideoGameGenreEnum.Default,
       slug: slugify(createVideoGameDto.productName, { lower: true }),
     });
+    videoGame.imageUrl.push(imageUrl);
     return await videoGame.save();
   }
 

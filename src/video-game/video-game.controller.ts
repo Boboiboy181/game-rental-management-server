@@ -7,6 +7,8 @@ import {
   Patch,
   Post,
   Query,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
 import { VideoGameService } from './video-game.service';
 import { CreateVideoGameDto } from './dtos/create-video-game.dto';
@@ -19,16 +21,41 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 
 @ApiTags('video-game')
 @Controller('video-game')
 export class VideoGameController {
-  constructor(private readonly videoGameService: VideoGameService) {}
+  constructor(
+    private readonly videoGameService: VideoGameService,
+    private readonly cloudinaryService: CloudinaryService,
+  ) {}
 
   @Post()
+  @UseInterceptors(FileInterceptor('file'))
   @ApiCreatedResponse({ type: VideoGame })
-  create(@Body() createVideoGameDto: CreateVideoGameDto): Promise<VideoGame> {
-    return this.videoGameService.createVideoGame(createVideoGameDto);
+  async create(
+    @Body() createVideoGameDto: CreateVideoGameDto,
+    @UploadedFile() file: Express.Multer.File,
+  ): Promise<VideoGame> {
+    // extract the image url from the cloudinary service
+    const result = await this.cloudinaryService.uploadFile(file);
+    const { secure_url } = result;
+
+    // assign the image url to the createVideoGameDto
+    return this.videoGameService.createVideoGame(
+      createVideoGameDto,
+      secure_url,
+    );
+  }
+
+  @Post('/upload')
+  @UseInterceptors(FileInterceptor('file'))
+  async ploadImage(@UploadedFile() file: Express.Multer.File) {
+    const result = await this.cloudinaryService.uploadFile(file);
+    const { secure_url } = result;
+    console.log(secure_url);
   }
 
   @Get()
