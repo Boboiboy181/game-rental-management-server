@@ -16,6 +16,8 @@ import { UpdateVideoGameDto } from './dtos/update-video-game.dto';
 import { VideoGame } from './schemas/video-game.schema';
 import { FilterVideoGameDto } from './dtos/filter-video-game.dto';
 import {
+  ApiBody,
+  ApiConsumes,
   ApiCreatedResponse,
   ApiOkResponse,
   ApiResponse,
@@ -34,6 +36,26 @@ export class VideoGameController {
 
   @Post()
   @UseInterceptors(FileInterceptor('file'))
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        productName: { type: 'string' },
+        price: { type: 'number' },
+        manufacture: { type: 'string' },
+        genre: { type: 'string' },
+        releaseDate: { type: 'string' },
+        language: { type: 'string' },
+        system: { type: 'string' },
+        description: { type: 'string' },
+        file: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+    },
+  })
   @ApiCreatedResponse({ type: VideoGame })
   async create(
     @Body() createVideoGameDto: CreateVideoGameDto,
@@ -49,14 +71,14 @@ export class VideoGameController {
       secure_url,
     );
   }
-
-  @Post('/upload')
-  @UseInterceptors(FileInterceptor('file'))
-  async ploadImage(@UploadedFile() file: Express.Multer.File) {
-    const result = await this.cloudinaryService.uploadFile(file);
-    const { secure_url } = result;
-    console.log(secure_url);
-  }
+  // example of how to upload a file to cloudinary using the cloudinary service
+  // @Post('/upload')
+  // @UseInterceptors(FileInterceptor('file'))
+  // async ploadImage(@UploadedFile() file: Express.Multer.File) {
+  //   const result = await this.cloudinaryService.uploadFile(file);
+  //   const { secure_url } = result;
+  //   console.log(secure_url);
+  // }
 
   @Get()
   @ApiOkResponse({ type: [VideoGame] })
