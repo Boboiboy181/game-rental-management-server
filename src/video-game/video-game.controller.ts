@@ -33,15 +33,29 @@ export class VideoGameController {
   ) {}
 
   @Post()
+  @UseInterceptors(FileInterceptor('file'))
   @ApiCreatedResponse({ type: VideoGame })
-  create(@Body() createVideoGameDto: CreateVideoGameDto): Promise<VideoGame> {
-    return this.videoGameService.createVideoGame(createVideoGameDto);
+  async create(
+    @Body() createVideoGameDto: CreateVideoGameDto,
+    @UploadedFile() file: Express.Multer.File,
+  ): Promise<VideoGame> {
+    // extract the image url from the cloudinary service
+    const result = await this.cloudinaryService.uploadFile(file);
+    const { secure_url } = result;
+
+    // assign the image url to the createVideoGameDto
+    return this.videoGameService.createVideoGame(
+      createVideoGameDto,
+      secure_url,
+    );
   }
 
   @Post('/upload')
   @UseInterceptors(FileInterceptor('file'))
-  uploadImage(@UploadedFile() file: Express.Multer.File) {
-    return this.cloudinaryService.uploadFile(file);
+  async ploadImage(@UploadedFile() file: Express.Multer.File) {
+    const result = await this.cloudinaryService.uploadFile(file);
+    const { secure_url } = result;
+    console.log(secure_url);
   }
 
   @Get()

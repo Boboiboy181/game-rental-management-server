@@ -13,10 +13,11 @@ import slugify from 'slugify';
 export class VideoGameService {
   constructor(
     @InjectModel('VideoGame') private readonly videoGameModel: Model<VideoGame>,
-  ) { }
+  ) {}
 
   async createVideoGame(
     createVideoGameDto: CreateVideoGameDto,
+    imageUrl: string,
   ): Promise<VideoGame> {
     const videoGame = new this.videoGameModel({
       ...createVideoGameDto,
@@ -24,6 +25,7 @@ export class VideoGameService {
       genre: VideoGameGenreEnum.Default,
       slug: slugify(createVideoGameDto.productName, { lower: true }),
     });
+    videoGame.imageUrl.push(imageUrl);
     return await videoGame.save();
   }
 
@@ -58,7 +60,10 @@ export class VideoGameService {
     await this.videoGameModel.deleteOne({ _id: id }).exec();
   }
 
-  async updateProduct(id: string, updateVideoGameDto: UpdateVideoGameDto): Promise<VideoGame> {
+  async updateProduct(
+    id: string,
+    updateVideoGameDto: UpdateVideoGameDto,
+  ): Promise<VideoGame> {
     const updated = await this.videoGameModel.findByIdAndUpdate(
       id,
       updateVideoGameDto,
