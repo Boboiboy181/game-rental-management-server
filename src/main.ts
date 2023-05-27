@@ -6,6 +6,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 async function bootstrap() {
   const logger = new Logger();
   const app = await NestFactory.create(AppModule);
+  app.enableCors();
 
   // Configuration for Swagger
   const config = new DocumentBuilder()

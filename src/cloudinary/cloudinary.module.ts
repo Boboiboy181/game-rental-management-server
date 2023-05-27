@@ -4,5 +4,6 @@ import { CloudinaryProvider } from './cloudinary/cloudinary.provider';
 
 @Module({
   providers: [CloudinaryService, CloudinaryProvider],
+  exports: [CloudinaryService, CloudinaryProvider],
 })
 export class CloudinaryModule {}

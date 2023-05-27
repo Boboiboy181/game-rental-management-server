@@ -7,6 +7,8 @@ import {
   Patch,
   Post,
   Query,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
 import { VideoGameService } from './video-game.service';
 import { CreateVideoGameDto } from './dtos/create-video-game.dto';
@@ -19,16 +21,27 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 
 @ApiTags('video-game')
 @Controller('video-game')
 export class VideoGameController {
-  constructor(private readonly videoGameService: VideoGameService) {}
+  constructor(
+    private readonly videoGameService: VideoGameService,
+    private readonly cloudinaryService: CloudinaryService,
+  ) {}
 
   @Post()
   @ApiCreatedResponse({ type: VideoGame })
   create(@Body() createVideoGameDto: CreateVideoGameDto): Promise<VideoGame> {
     return this.videoGameService.createVideoGame(createVideoGameDto);
+  }
+
+  @Post('/upload')
+  @UseInterceptors(FileInterceptor('file'))
+  uploadImage(@UploadedFile() file: Express.Multer.File) {
+    return this.cloudinaryService.uploadFile(file);
   }
 
   @Get()
