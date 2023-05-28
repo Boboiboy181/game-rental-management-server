@@ -16,6 +16,10 @@ export class VideoGame {
   @Prop()
   price: number;
 
+  @ApiProperty({ example: 10 })
+  @Prop()
+  quantity: number;
+
   @ApiProperty({ example: 'EA' })
   @Prop()
   manufacture: string;

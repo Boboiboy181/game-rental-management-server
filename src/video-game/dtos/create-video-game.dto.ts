@@ -16,6 +16,12 @@ export class CreateVideoGameDto {
 
   @ApiProperty()
   @IsNotEmpty()
+  @IsNumber()
+  @Type(() => Number)
+  quantity: number;
+
+  @ApiProperty()
+  @IsNotEmpty()
   @IsString()
   manufacture: string;
 
