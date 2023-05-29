@@ -11,6 +11,7 @@ export class UpdateVideoGameDto extends PartialType(CreateVideoGameDto) {
   @IsEnum(VideoGameSystemEnum)
   system?: VideoGameSystemEnum;
 
+
   @ApiProperty({ enum: VideoGameGenreEnum })
   @IsOptional()
   @IsEnum(VideoGameGenreEnum)
