@@ -43,6 +43,7 @@ export class VideoGameController {
       properties: {
         productName: { type: 'string' },
         price: { type: 'number' },
+        quantity: { type: 'number' },
         manufacture: { type: 'string' },
         genre: { type: 'string' },
         releaseDate: { type: 'string' },
