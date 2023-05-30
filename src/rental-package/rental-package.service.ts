@@ -5,12 +5,19 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { RentalPackage } from './schemas/rental-package.schema';
 import { FilterRentalPackageDto } from './dtos/filter-rental-package.dto';
+import { RegisterRentalPackageDto } from './dtos/register-rental-package.dto';
+import { RentalPackageRegistration } from './schemas/rental-package-registration.schema';
+import { Customer } from 'src/customer/schemas/customer.schema';
 
 @Injectable()
 export class RentalPackageService {
   constructor(
     @InjectModel('RentalPackage')
     private readonly rentalPackageModel: Model<RentalPackage>,
+    @InjectModel('RentalPackageRegistration')
+    private readonly rentalPackageRegistrationModel: Model<RentalPackageRegistration>,
+    @InjectModel('Customer')
+    private readonly customerModel: Model<Customer>,
   ) {}
 
   async createRentalPackage(
@@ -44,6 +51,29 @@ export class RentalPackageService {
       });
     }
     return await query.exec();
+  }
+
+  async registerRentalPackage(
+    registerRentalPackageDto: RegisterRentalPackageDto,
+  ): Promise<RentalPackageRegistration> {
+    const { packageSearch, customerSearch } = registerRentalPackageDto;
+
+    // Find the package
+    const rentalPackage = await this.rentalPackageModel.findOne({
+      packageName: { $regex: new RegExp(packageSearch, 'i') },
+    });
+
+    // Find the customer
+    const customer = await this.customerModel.findOne({
+      phoneNumber: customerSearch,
+    });
+
+    // Register the package
+    const rentalPackageRegistration = new this.rentalPackageRegistrationModel({
+      rentalPackage,
+      customer,
+    });
+    return await rentalPackageRegistration.save();
   }
 
   findOne(id: number) {

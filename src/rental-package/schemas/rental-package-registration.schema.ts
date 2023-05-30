@@ -16,6 +16,15 @@ export class RentalPackageRegistration {
 
   @Prop({ default: Date.now })
   registrationDate: Date;
+
+  @Prop({
+    default: () => {
+      const endDate = new Date();
+      endDate.setDate(endDate.getDate() + 30);
+      return endDate;
+    },
+  })
+  registrationEndDate: Date;
 }
 
 export const RentalPackageRegistrationSchema = SchemaFactory.createForClass(
