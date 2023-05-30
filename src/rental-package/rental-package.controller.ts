@@ -16,8 +16,10 @@ export class RentalPackageController {
   constructor(private readonly rentalPackageService: RentalPackageService) {}
 
   @Post()
-  create(@Body() createRentalPackageDto: CreateRentalPackageDto) {
-    return this.rentalPackageService.create(createRentalPackageDto);
+  createRentalPackage(@Body() createRentalPackageDto: CreateRentalPackageDto) {
+    return this.rentalPackageService.createRentalPackage(
+      createRentalPackageDto,
+    );
   }
 
   @Get()

@@ -1,11 +1,24 @@
 import { Injectable } from '@nestjs/common';
 import { CreateRentalPackageDto } from './dtos/create-rental-package.dto';
 import { UpdateRentalPackageDto } from './dtos/update-rental-package.dto';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { RentalPackage } from './schemas/rental-package.schema';
 
 @Injectable()
 export class RentalPackageService {
-  create(createRentalPackageDto: CreateRentalPackageDto) {
-    return 'This action adds a new rentalPackage';
+  constructor(
+    @InjectModel('RentalPackage')
+    private readonly rentalPackageModel: Model<RentalPackage>,
+  ) {}
+
+  async createRentalPackage(
+    createRentalPackageDto: CreateRentalPackageDto,
+  ): Promise<RentalPackage> {
+    const rentalPackage = new this.rentalPackageModel({
+      ...createRentalPackageDto,
+    });
+    return await rentalPackage.save();
   }
 
   findAll() {

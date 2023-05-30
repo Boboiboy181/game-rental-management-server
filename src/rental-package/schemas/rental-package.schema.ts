@@ -1,13 +1,12 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Schema as MongooseSchema, Types } from 'mongoose';
-import { Customer } from '../../customer/schemas/customer.schema';
 
 export type RentalPackageDocument = HydratedDocument<RentalPackage>;
 
-@Schema()
+@Schema({ timestamps: true })
 export class RentalPackage {
   // name of rental package
-  @Prop()
+  @Prop({ unique: true })
   packageName: string;
 
   // number of games that can be rented
