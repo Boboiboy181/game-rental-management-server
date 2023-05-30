@@ -12,6 +12,7 @@ import { RentalPackageService } from './rental-package.service';
 import { CreateRentalPackageDto } from './dtos/create-rental-package.dto';
 import { UpdateRentalPackageDto } from './dtos/update-rental-package.dto';
 import { FilterRentalPackageDto } from './dtos/filter-rental-package.dto';
+import { RegisterRentalPackageDto } from './dtos/register-rental-package.dto';
 
 @Controller('rental-package')
 export class RentalPackageController {
@@ -27,6 +28,15 @@ export class RentalPackageController {
   @Get()
   getRentalPackages(@Query() filterRentalPackageDto: FilterRentalPackageDto) {
     return this.rentalPackageService.getRentalPackages(filterRentalPackageDto);
+  }
+
+  @Post('/register')
+  registerRentalPackage(
+    @Body() registerRentalPackageDto: RegisterRentalPackageDto,
+  ) {
+    return this.rentalPackageService.registerRentalPackage(
+      registerRentalPackageDto,
+    );
   }
 
   @Get(':id')
