@@ -6,10 +6,12 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { RentalPackageService } from './rental-package.service';
 import { CreateRentalPackageDto } from './dtos/create-rental-package.dto';
 import { UpdateRentalPackageDto } from './dtos/update-rental-package.dto';
+import { FilterRentalPackageDto } from './dtos/filter-rental-package.dto';
 
 @Controller('rental-package')
 export class RentalPackageController {
@@ -23,8 +25,8 @@ export class RentalPackageController {
   }
 
   @Get()
-  findAll() {
-    return this.rentalPackageService.findAll();
+  getRentalPackages(@Query() filterRentalPackageDto: FilterRentalPackageDto) {
+    return this.rentalPackageService.getRentalPackages(filterRentalPackageDto);
   }
 
   @Get(':id')

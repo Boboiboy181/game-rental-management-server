@@ -4,6 +4,7 @@ import { UpdateRentalPackageDto } from './dtos/update-rental-package.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { RentalPackage } from './schemas/rental-package.schema';
+import { FilterRentalPackageDto } from './dtos/filter-rental-package.dto';
 
 @Injectable()
 export class RentalPackageService {
@@ -21,8 +22,28 @@ export class RentalPackageService {
     return await rentalPackage.save();
   }
 
-  findAll() {
-    return `This action returns all rentalPackage`;
+  async getRentalPackages(
+    filterRentalPackageDto: FilterRentalPackageDto,
+  ): Promise<RentalPackage[]> {
+    const { packageName, numberOfGames, price, timeOfRental } =
+      filterRentalPackageDto;
+    const query = this.rentalPackageModel.find();
+    query.setOptions({ lean: true });
+    if (numberOfGames) {
+      query.where({ numberOfGames });
+    }
+    if (price) {
+      query.where({ price });
+    }
+    if (timeOfRental) {
+      query.where({ timeOfRental });
+    }
+    if (packageName) {
+      query.where({
+        $or: [{ packageName: { $regex: packageName, $options: 'i' } }],
+      });
+    }
+    return await query.exec();
   }
 
   findOne(id: number) {
