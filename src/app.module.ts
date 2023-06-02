@@ -6,6 +6,7 @@ import { configValidationSchema } from './config.schema';
 import { VideoGameModule } from './video-game/video-game.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { CustomerModule } from './customer/customer.module';
+import { PreOrderModule } from './pre-order/pre-order.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { CustomerModule } from './customer/customer.module';
     VideoGameModule,
     CloudinaryModule,
     CustomerModule,
+    PreOrderModule,
   ],
 })
 export class AppModule {}
