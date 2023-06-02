@@ -23,14 +23,13 @@ import {
 } from '@nestjs/swagger';
 import { FilterRegisterRentalPackageListDto } from './dtos/filter-register-rental-package.dto';
 
-
 @ApiTags('rental-package')
 @Controller('rental-package')
 export class RentalPackageController {
   constructor(private readonly rentalPackageService: RentalPackageService) {}
 
   @Post()
-  @ApiCreatedResponse({type:RentalPackage})
+  @ApiCreatedResponse({ type: RentalPackage })
   createRentalPackage(@Body() createRentalPackageDto: CreateRentalPackageDto) {
     return this.rentalPackageService.createRentalPackage(
       createRentalPackageDto,
@@ -50,7 +49,7 @@ export class RentalPackageController {
   }
 
   @Post('/register')
-  @ApiCreatedResponse({type:RentalPackageRegistration})
+  @ApiCreatedResponse({ type: RentalPackageRegistration })
   registerRentalPackage(
     @Body() registerRentalPackageDto: RegisterRentalPackageDto,
   ) {
@@ -61,8 +60,13 @@ export class RentalPackageController {
 
   @Get('/registerationlist')
   @ApiOkResponse({ type: [RentalPackageRegistration] })
-  getRentalPackages(@Query() filterRegisterRentalPackageListDto: FilterRegisterRentalPackageListDto) {
-    return this.rentalPackageService.getRegisterRentalPackage(filterRegisterRentalPackageListDto);
+  getRentalPackages(
+    @Query()
+    filterRegisterRentalPackageListDto: FilterRegisterRentalPackageListDto,
+  ) {
+    return this.rentalPackageService.getRegisterRentalPackage(
+      filterRegisterRentalPackageListDto,
+    );
   }
 
   @Patch(':id')
@@ -70,8 +74,11 @@ export class RentalPackageController {
   update(
     @Param('id') id: string,
     @Body() updateRentalPackageDto: UpdateRentalPackageDto,
-  ) :Promise <RentalPackage>{
-    return this.rentalPackageService.updateRentalPackage(id, updateRentalPackageDto);
+  ): Promise<RentalPackage> {
+    return this.rentalPackageService.updateRentalPackage(
+      id,
+      updateRentalPackageDto,
+    );
   }
 
   @Delete(':id')

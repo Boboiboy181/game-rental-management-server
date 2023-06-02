@@ -1,9 +1,13 @@
-import {ApiPropertyOptional } from '@nestjs/swagger';
-import { IsString,IsNumberString,MaxLength,MinLength,IsOptional } from 'class-validator';
-
+import { ApiPropertyOptional } from '@nestjs/swagger';
+import {
+  IsString,
+  IsNumberString,
+  MaxLength,
+  MinLength,
+  IsOptional,
+} from 'class-validator';
 
 export class FilterRegisterRentalPackageListDto {
-  
   @ApiPropertyOptional()
   @IsString()
   @IsOptional()
