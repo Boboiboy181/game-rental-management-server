@@ -14,13 +14,15 @@ import { UpdateRentalPackageDto } from './dtos/update-rental-package.dto';
 import { FilterRentalPackageDto } from './dtos/filter-rental-package.dto';
 import { RegisterRentalPackageDto } from './dtos/register-rental-package.dto';
 import { RentalPackage } from './schemas/rental-package.schema';
+import { RentalPackageRegistration } from './schemas/rental-package-registration.schema';
 import {
   ApiCreatedResponse,
   ApiOkResponse,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { RentalPackageRegistration } from './schemas/rental-package-registration.schema';
+import { FilterRegisterRentalPackageListDto } from './dtos/filter-register-rental-package.dto';
+
 
 @ApiTags('rental-package')
 @Controller('rental-package')
@@ -37,7 +39,7 @@ export class RentalPackageController {
 
   @Get()
   @ApiOkResponse({ type: [RentalPackage] })
-  getRentalPackages(@Query() filterRentalPackageDto: FilterRentalPackageDto) {
+  get(@Query() filterRentalPackageDto: FilterRentalPackageDto) {
     return this.rentalPackageService.getRentalPackages(filterRentalPackageDto);
   }
 
@@ -55,6 +57,12 @@ export class RentalPackageController {
     return this.rentalPackageService.registerRentalPackage(
       registerRentalPackageDto,
     );
+  }
+
+  @Get('/registerationlist')
+  @ApiOkResponse({ type: [RentalPackageRegistration] })
+  getRentalPackages(@Query() filterRegisterRentalPackageListDto: FilterRegisterRentalPackageListDto) {
+    return this.rentalPackageService.getRegisterRentalPackage(filterRegisterRentalPackageListDto);
   }
 
   @Patch(':id')

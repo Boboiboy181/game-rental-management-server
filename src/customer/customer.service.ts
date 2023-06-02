@@ -39,7 +39,6 @@ export class CustomerService {
     if (phoneNumber) {
       query.where({ phoneNumber: { $regex: phoneNumber, $options: 'i' } });
     }
-
     return await query.exec();
   }
 
