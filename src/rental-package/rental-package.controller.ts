@@ -13,12 +13,22 @@ import { CreateRentalPackageDto } from './dtos/create-rental-package.dto';
 import { UpdateRentalPackageDto } from './dtos/update-rental-package.dto';
 import { FilterRentalPackageDto } from './dtos/filter-rental-package.dto';
 import { RegisterRentalPackageDto } from './dtos/register-rental-package.dto';
+import { RentalPackage } from './schemas/rental-package.schema';
+import {
+  ApiCreatedResponse,
+  ApiOkResponse,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
+import { RentalPackageRegistration } from './schemas/rental-package-registration.schema';
 
+@ApiTags('rental-package')
 @Controller('rental-package')
 export class RentalPackageController {
   constructor(private readonly rentalPackageService: RentalPackageService) {}
 
   @Post()
+  @ApiCreatedResponse({type:RentalPackage})
   createRentalPackage(@Body() createRentalPackageDto: CreateRentalPackageDto) {
     return this.rentalPackageService.createRentalPackage(
       createRentalPackageDto,
@@ -26,11 +36,19 @@ export class RentalPackageController {
   }
 
   @Get()
+  @ApiOkResponse({ type: [RentalPackage] })
   getRentalPackages(@Query() filterRentalPackageDto: FilterRentalPackageDto) {
     return this.rentalPackageService.getRentalPackages(filterRentalPackageDto);
   }
 
+  @Get(':id')
+  @ApiOkResponse({ type: RentalPackage })
+  getVideoGameById(@Param('id') id: string): Promise<RentalPackage> {
+    return this.rentalPackageService.getRentalPackageById(id);
+  }
+
   @Post('/register')
+  @ApiCreatedResponse({type:RentalPackageRegistration})
   registerRentalPackage(
     @Body() registerRentalPackageDto: RegisterRentalPackageDto,
   ) {
@@ -39,21 +57,18 @@ export class RentalPackageController {
     );
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.rentalPackageService.findOne(+id);
-  }
-
   @Patch(':id')
+  @ApiOkResponse({ type: RentalPackage })
   update(
     @Param('id') id: string,
     @Body() updateRentalPackageDto: UpdateRentalPackageDto,
-  ) {
-    return this.rentalPackageService.update(+id, updateRentalPackageDto);
+  ) :Promise <RentalPackage>{
+    return this.rentalPackageService.updateRentalPackage(id, updateRentalPackageDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.rentalPackageService.remove(+id);
+  @ApiResponse({ status: 204, description: 'Delete success' })
+  async deleteRentalPackage(@Param('id') id: string): Promise<void> {
+    await this.rentalPackageService.deleteRentalPackage(id);
   }
 }

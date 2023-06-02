@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateRentalPackageDto } from './dtos/create-rental-package.dto';
 import { UpdateRentalPackageDto } from './dtos/update-rental-package.dto';
 import { InjectModel } from '@nestjs/mongoose';
@@ -53,6 +53,15 @@ export class RentalPackageService {
     return await query.exec();
   }
 
+
+  async getRentalPackageById(id: string): Promise<RentalPackage> {
+    const result = await this.rentalPackageModel.findById(id).exec();
+    if (!result) {
+      throw new NotFoundException(`Rental Package with id ${id} not found`);
+    }
+    return result;
+  }
+
   async registerRentalPackage(
     registerRentalPackageDto: RegisterRentalPackageDto,
   ): Promise<RentalPackageRegistration> {
@@ -76,15 +85,26 @@ export class RentalPackageService {
     return await rentalPackageRegistration.save();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} rentalPackage`;
+  async updateRentalPackage(
+    id: string,
+    updateRentalPackageDto: UpdateRentalPackageDto,
+  ): Promise<RentalPackage> {
+    const updatedpackage = await this.rentalPackageModel.findByIdAndUpdate(
+      id,
+      updateRentalPackageDto,
+      { new: true },
+    );
+    if (!updatedpackage) {
+      throw new NotFoundException('Rental Package not found');
+    }
+    return updatedpackage;
   }
 
-  update(id: number, updateRentalPackageDto: UpdateRentalPackageDto) {
-    return `This action updates a #${id} rentalPackage`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} rentalPackage`;
+  async deleteRentalPackage(id: string): Promise<void> {
+    const result = await this.getRentalPackageById(id);
+    if (!result) {
+      throw new NotFoundException(`Rental Package with id ${id} not found`);
+    }
+    await this.customerModel.deleteOne({ _id: id }).exec();
   }
 }
