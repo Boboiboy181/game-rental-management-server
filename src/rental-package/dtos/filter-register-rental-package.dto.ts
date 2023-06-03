@@ -11,17 +11,17 @@ export class FilterRegisterRentalPackageListDto {
   @ApiPropertyOptional()
   @IsString()
   @IsOptional()
-  packageName: string;
+  packageName?: string;
 
   @ApiPropertyOptional()
   @IsString()
   @IsOptional()
-  name: string;
+  name?: string;
 
   @ApiPropertyOptional({ example: '0123456789' })
   @IsNumberString()
   @MaxLength(10)
   @MinLength(10)
   @IsOptional()
-  phoneNumber: number;
+  phoneNumber?: number;
 }

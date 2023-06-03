@@ -36,15 +36,26 @@ export class RentalPackageController {
     );
   }
 
+  @Get('/registration-list')
+  @ApiOkResponse({ type: [RentalPackageRegistration] })
+  getRegisterRentalPackage(
+    @Query()
+    filterRegisterRentalPackageListDto: FilterRegisterRentalPackageListDto,
+  ) {
+    return this.rentalPackageService.getRegisterRentalPackage(
+      filterRegisterRentalPackageListDto,
+    );
+  }
+
   @Get()
   @ApiOkResponse({ type: [RentalPackage] })
-  get(@Query() filterRentalPackageDto: FilterRentalPackageDto) {
+  getRentalPackages(@Query() filterRentalPackageDto: FilterRentalPackageDto) {
     return this.rentalPackageService.getRentalPackages(filterRentalPackageDto);
   }
 
   @Get(':id')
   @ApiOkResponse({ type: RentalPackage })
-  getVideoGameById(@Param('id') id: string): Promise<RentalPackage> {
+  getRentalPackageById(@Param('id') id: string): Promise<RentalPackage> {
     return this.rentalPackageService.getRentalPackageById(id);
   }
 
@@ -58,20 +69,9 @@ export class RentalPackageController {
     );
   }
 
-  @Get('/registerationlist')
-  @ApiOkResponse({ type: [RentalPackageRegistration] })
-  getRentalPackages(
-    @Query()
-    filterRegisterRentalPackageListDto: FilterRegisterRentalPackageListDto,
-  ) {
-    return this.rentalPackageService.getRegisterRentalPackage(
-      filterRegisterRentalPackageListDto,
-    );
-  }
-
   @Patch(':id')
   @ApiOkResponse({ type: RentalPackage })
-  update(
+  updateRentalPackage(
     @Param('id') id: string,
     @Body() updateRentalPackageDto: UpdateRentalPackageDto,
   ): Promise<RentalPackage> {
