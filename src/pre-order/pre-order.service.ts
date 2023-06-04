@@ -5,6 +5,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { PreOrder } from './schemas/pre-order.schema';
 import { VideoGame } from 'src/video-game/schemas/video-game.schema';
+import { RentalDaysEnum } from './enums/rental-days.enum';
 
 @Injectable()
 export class PreOrderService {
@@ -21,7 +22,7 @@ export class PreOrderService {
     // create new pre-order
     const preOrder = new this.preOrderModel({
       customerName,
-      numberOfRentalDays,
+      numberOfRentalDays: RentalDaysEnum[numberOfRentalDays],
     });
 
     // find games and calculate total price
@@ -43,15 +44,15 @@ export class PreOrderService {
 
     // calculate return date
     const returnDate = new Date(Date.now());
-    returnDate.setDate(returnDate.getDate() + numberOfRentalDays);
+    returnDate.setDate(returnDate.getDate() + preOrder.numberOfRentalDays);
     preOrder.returnDate = returnDate;
 
     // calculate estimated price
-    if (numberOfRentalDays == 3 || numberOfRentalDays == 14) {
+    if (preOrder.numberOfRentalDays == 3 || preOrder.numberOfRentalDays == 14) {
       preOrder.estimatedPrice = totalGamesPrice * 0.85;
-    } else if (numberOfRentalDays == 30) {
+    } else if (preOrder.numberOfRentalDays == 30) {
       preOrder.estimatedPrice = totalGamesPrice * 0.83;
-    } else if (numberOfRentalDays == 60) {
+    } else if (preOrder.numberOfRentalDays == 60) {
       preOrder.estimatedPrice = totalGamesPrice * 0.8;
     } else {
       preOrder.estimatedPrice = totalGamesPrice;

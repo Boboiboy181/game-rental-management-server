@@ -1,5 +1,5 @@
-import { Type } from 'class-transformer';
-import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsString } from 'class-validator';
+import { RentalDaysEnum } from '../enums/rental-days.enum';
 
 export class CreatePreOrderDto {
   @IsNotEmpty()
@@ -7,9 +7,8 @@ export class CreatePreOrderDto {
   customerName: string;
 
   @IsNotEmpty()
-  @IsNumber()
-  @Type(() => Number)
-  numberOfRentalDays: number;
+  @IsEnum(RentalDaysEnum)
+  numberOfRentalDays: RentalDaysEnum;
 
   @IsNotEmpty()
   rentedGames: [{ game: string; quantity: number }];
