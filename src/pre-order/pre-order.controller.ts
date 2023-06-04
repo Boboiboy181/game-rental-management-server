@@ -28,8 +28,8 @@ export class PreOrderController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.preOrderService.findOne(+id);
+  getPreOrderById(@Param('id') id: string) {
+    return this.preOrderService.getPreOrderById(id);
   }
 
   @Patch(':id')

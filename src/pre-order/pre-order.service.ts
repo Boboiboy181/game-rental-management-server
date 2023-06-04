@@ -65,8 +65,8 @@ export class PreOrderService {
     return `This action returns all preOrder`;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} preOrder`;
+  async getPreOrderById(id: string): Promise<PreOrder> {
+    return await this.preOrderModel.findById(id).exec();
   }
 
   update(id: number, updatePreOrderDto: UpdatePreOrderDto) {
