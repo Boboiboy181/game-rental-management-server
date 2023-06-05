@@ -118,6 +118,9 @@ export class RentalPackageService {
           match: { _id: rentalPackageId },
         });
       }
+      else {
+        throw new NotFoundException(`Rental Package with id ${packageName} not found`);
+      }
     }
     if (name) {
       const customer = await this.customerModel.findOne({
@@ -132,6 +135,9 @@ export class RentalPackageService {
           match: { _id: customerId },
         });
       }
+      else{
+        throw new NotFoundException(`Rental Package with customer's name: ${name} not found`);
+      }
     }
     if (phoneNumber) {
       const customer = await this.customerModel.findOne({
@@ -145,6 +151,10 @@ export class RentalPackageService {
           path: 'customer',
           match: { _id: customerId },
         });
+      }
+      else
+      {
+        throw new NotFoundException(`Rental Package with phone number ${phoneNumber} not found`);
       }
     }
     return await query.exec();
