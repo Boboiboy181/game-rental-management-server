@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreatePreOrderDto } from './dtos/create-pre-order.dto';
 import { UpdatePreOrderDto } from './dtos/update-pre-order.dto';
 import { InjectModel } from '@nestjs/mongoose';
@@ -73,7 +73,11 @@ export class PreOrderService {
     return `This action updates a #${id} preOrder`;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} preOrder`;
+  async deletePreOrder(id: string): Promise<void> {
+    const result = await this.getPreOrderById(id);
+    if (!result) {
+      throw new NotFoundException(`Customer with id ${id} not found`);
+    }
+    await this.preOrderModel.deleteOne({ _id: id }).exec();
   }
 }
