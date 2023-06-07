@@ -7,6 +7,7 @@ import { VideoGameModule } from './video-game/video-game.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { CustomerModule } from './customer/customer.module';
 import { PreOrderModule } from './pre-order/pre-order.module';
+import { RentalPackageModule } from './rental-package/rental-package.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { PreOrderModule } from './pre-order/pre-order.module';
     CloudinaryModule,
     CustomerModule,
     PreOrderModule,
+    RentalPackageModule,
   ],
 })
 export class AppModule {}
