@@ -6,7 +6,6 @@ import { Model } from 'mongoose';
 import { PreOrder } from './schemas/pre-order.schema';
 import { VideoGame } from 'src/video-game/schemas/video-game.schema';
 import { RentalDaysEnum } from './enums/rental-days.enum';
-import { async } from 'rxjs';
 import { FilterPreOrderDto } from './dtos/filter-pre-order.dto';
 
 @Injectable()
@@ -63,10 +62,8 @@ export class PreOrderService {
     return await preOrder.save();
   }
 
-  async getPreOrder(
-    filterPreOrderDto: FilterPreOrderDto,
-  ): Promise<PreOrder[]> {
-    const { name} = filterPreOrderDto;
+  async getPreOrder(filterPreOrderDto: FilterPreOrderDto): Promise<PreOrder[]> {
+    const { name } = filterPreOrderDto;
 
     const query = this.preOrderModel.find();
     query.setOptions({ lean: true });
