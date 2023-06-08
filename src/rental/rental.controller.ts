@@ -1,11 +1,11 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
+  Controller,
   Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
 } from '@nestjs/common';
 import { RentalService } from './rental.service';
 import { CreateRentalDto } from './dtos/create-rental.dto';
@@ -16,8 +16,8 @@ export class RentalController {
   constructor(private readonly rentalService: RentalService) {}
 
   @Post()
-  create(@Body() createRentalDto: CreateRentalDto) {
-    return this.rentalService.create(createRentalDto);
+  createRental(@Body() createRentalDto: CreateRentalDto) {
+    return this.rentalService.createRental(createRentalDto);
   }
 
   @Get()

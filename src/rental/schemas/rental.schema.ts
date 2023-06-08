@@ -1,5 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument } from 'mongoose';
+import { HydratedDocument, Schema as MongooseSchema } from 'mongoose';
+import { RentalDaysEnum } from '../../pre-order/enums/rental-days.enum';
+import { VideoGame } from '../../video-game/schemas/video-game.schema';
 
 export type RentalDocument = HydratedDocument<Rental>;
 
@@ -9,18 +11,18 @@ export class Rental {
   customerName: string;
 
   @Prop()
-  numberOfRentalDays: number;
+  numberOfRentalDays: RentalDaysEnum;
 
   @Prop()
   returnDate: Date;
 
   @Prop([
     {
-      game: { type: String },
+      game: { type: MongooseSchema.Types.ObjectId, ref: 'VideoGame' },
       quantity: Number,
     },
   ])
-  rentedGames: [{ game: string; quantity: number }];
+  rentedGames: [{ game: VideoGame; quantity: number }];
 
   @Prop()
   deposit: number;
