@@ -69,8 +69,12 @@ export class RentalService {
     return `This action returns all rental`;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} rental`;
+  async getRentalById(id: string): Promise<Rental> {
+    const result = await this.rentalModel.findById(id).exec();
+    if (!result) {
+      throw new Error(`Rental with id ${id} not found`);
+    }
+    return result;
   }
 
   update(id: number, updateRentalDto: UpdateRentalDto) {
