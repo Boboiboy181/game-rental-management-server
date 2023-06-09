@@ -3,6 +3,7 @@ import { HydratedDocument, Schema as MongooseSchema } from 'mongoose';
 import { RentalDaysEnum } from '../../pre-order/enums/rental-days.enum';
 import { VideoGame } from '../../video-game/schemas/video-game.schema';
 import { Customer } from '../../customer/schemas/customer.schema';
+import { ReturnStateEnum } from '../enums/return-state.enum';
 
 export type RentalDocument = HydratedDocument<Rental>;
 
@@ -32,7 +33,7 @@ export class Rental {
   estimatedPrice: number;
 
   @Prop()
-  returnState: boolean;
+  returnState: ReturnStateEnum;
 }
 
 export const RentalSchema = SchemaFactory.createForClass(Rental);

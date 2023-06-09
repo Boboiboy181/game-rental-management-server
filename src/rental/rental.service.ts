@@ -7,6 +7,7 @@ import { Rental } from './schemas/rental.schema';
 import { RentalDaysEnum } from '../pre-order/enums/rental-days.enum';
 import { VideoGameService } from '../video-game/video-game.service';
 import { CustomerService } from '../customer/customer.service';
+import { ReturnStateEnum } from './enums/return-state.enum';
 
 @Injectable()
 export class RentalService {
@@ -35,6 +36,7 @@ export class RentalService {
       customer,
       numberOfRentalDays: RentalDaysEnum[numberOfRentalDays],
       deposit,
+      returnState: ReturnStateEnum.NOT_RETURNED,
     });
     // find games and calculate total price
     const totalGamesPrice = rentedGames.map(async (rentedGame) => {
