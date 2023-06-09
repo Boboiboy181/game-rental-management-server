@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateRentalDto } from './dtos/create-rental.dto';
 import { UpdateRentalDto } from './dtos/update-rental.dto';
 import { InjectModel } from '@nestjs/mongoose';
@@ -42,10 +42,21 @@ export class RentalService {
       // find game
       const videoGame = await this.videoGameService.getVideoGameById(gameId);
       // add game and update quantity
-      rental.rentedGames.push({ game: videoGame, quantity });
-      await this.videoGameService.updateProduct(gameId, {
-        quantity: videoGame.quantity - quantity,
-      });
+
+      if (
+        videoGame.quantity >= quantity &&
+        quantity > 0 &&
+        videoGame.quantity > 0
+      ) {
+        rental.rentedGames.push({ game: videoGame, quantity });
+        await this.videoGameService.updateProduct(gameId, {
+          quantity: videoGame.quantity - quantity,
+        });
+      } else {
+        throw new BadRequestException(
+          `Game ${videoGame.productName} is out of stock`,
+        );
+      }
       return videoGame.price * quantity;
     });
 

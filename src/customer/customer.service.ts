@@ -5,7 +5,6 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Customer } from './schemas/customer.schema';
 import { FilterCustomerDto } from './dtos/filter-customer.dto';
-import { CreateRentalDto } from '../rental/dtos/create-rental.dto';
 
 @Injectable()
 export class CustomerService {
@@ -70,8 +69,8 @@ export class CustomerService {
           return await this.createCustomer({
             customerName,
             phoneNumber,
-            email: ' ',
-            address: ' ',
+            email: '',
+            address: '',
           });
         } else {
           throw error;
