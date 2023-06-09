@@ -4,41 +4,48 @@ import { UpdateRentalDto } from './dtos/update-rental.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Rental } from './schemas/rental.schema';
-import { VideoGame } from '../video-game/schemas/video-game.schema';
 import { RentalDaysEnum } from '../pre-order/enums/rental-days.enum';
+import { VideoGameService } from '../video-game/video-game.service';
+import { CustomerService } from '../customer/customer.service';
 
 @Injectable()
 export class RentalService {
   constructor(
     @InjectModel('Rental') private readonly rentalModel: Model<Rental>,
-    @InjectModel('VideoGame') private readonly videoGameModel: Model<VideoGame>,
+    private readonly videoGameService: VideoGameService,
+    private readonly customerService: CustomerService,
   ) {}
 
   async createRental(createRentalDto: CreateRentalDto): Promise<Rental> {
-    const { customerName, rentedGames, numberOfRentalDays, deposit } =
-      createRentalDto;
-
+    const {
+      customerId,
+      phoneNumber,
+      customerName,
+      rentedGames,
+      numberOfRentalDays,
+      deposit,
+    } = createRentalDto;
+    // find customer
+    const customer = await this.customerService.getCustomerById(customerId, {
+      customerName,
+      phoneNumber,
+    });
     // create new rental
     const rental = new this.rentalModel({
-      customerName,
+      customer,
       numberOfRentalDays: RentalDaysEnum[numberOfRentalDays],
       deposit,
     });
-
     // find games and calculate total price
     const totalGamesPrice = rentedGames.map(async (rentedGame) => {
-      const { game, quantity } = rentedGame;
-
-      const videoGame = await this.videoGameModel
-        .findOne({
-          productName: { $regex: new RegExp(game, 'i') },
-        })
-        .exec();
-      if (!videoGame) {
-        throw new Error(`Game ${game} not found`);
-      }
-
+      const { gameId, quantity } = rentedGame;
+      // find game
+      const videoGame = await this.videoGameService.getVideoGameById(gameId);
+      // add game and update quantity
       rental.rentedGames.push({ game: videoGame, quantity });
+      await this.videoGameService.updateProduct(gameId, {
+        quantity: videoGame.quantity - quantity,
+      });
       return videoGame.price * quantity;
     });
 
@@ -53,14 +60,25 @@ export class RentalService {
     rental.returnDate = returnDate;
 
     // calculate estimated price
-    if (rental.numberOfRentalDays == 3 || rental.numberOfRentalDays == 14) {
-      rental.estimatedPrice = totalPrice * 0.85;
-    } else if (rental.numberOfRentalDays == 30) {
-      rental.estimatedPrice = totalPrice * 0.83;
-    } else if (rental.numberOfRentalDays == 60) {
-      rental.estimatedPrice = totalPrice * 0.8;
-    } else {
-      rental.estimatedPrice = totalPrice;
+    switch (rental.numberOfRentalDays) {
+      case RentalDaysEnum.ONE_DAY:
+        rental.estimatedPrice = totalPrice;
+        break;
+      case RentalDaysEnum.THREE_DAYS:
+        rental.estimatedPrice = totalPrice * 0.85;
+        break;
+      case RentalDaysEnum.SEVEN_DAYS:
+        rental.estimatedPrice = totalPrice * 0.85;
+        break;
+      case RentalDaysEnum.THIRTY_DAYS:
+        rental.estimatedPrice = totalPrice * 0.83;
+        break;
+      case RentalDaysEnum.SIXTY_DAYS:
+        rental.estimatedPrice = totalPrice * 0.8;
+        break;
+      default:
+        rental.estimatedPrice = totalPrice;
+        break;
     }
     return await rental.save();
   }
