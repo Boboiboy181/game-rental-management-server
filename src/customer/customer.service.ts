@@ -42,12 +42,43 @@ export class CustomerService {
     return await query.exec();
   }
 
-  async getCustomerById(id: string): Promise<Customer> {
-    const result = await this.customerModel.findById(id).exec();
-    if (!result) {
-      throw new NotFoundException(`Customer with id ${id} not found`);
+  // old code
+  // async getCustomerById(id: string): Promise<Customer> {
+  //   const result = await this.customerModel.findById(id).exec();
+  //   if (!result) {
+  //     throw new NotFoundException(`Customer with id ${id} not found`);
+  //   }
+  //   return result;
+  // }
+
+  // new code
+  async getCustomerById(
+    id: string,
+    createCustomerDto?: CreateCustomerDto,
+  ): Promise<Customer> {
+    try {
+      const result = await this.customerModel.findById(id).exec();
+      if (!result) {
+        throw new NotFoundException(`Customer with id ${id} not found`);
+      }
+      return result;
+    } catch (error) {
+      if (error instanceof NotFoundException || error.name === 'CastError') {
+        if (createCustomerDto) {
+          const { phoneNumber, customerName } = createCustomerDto;
+          return await this.createCustomer({
+            customerName,
+            phoneNumber,
+            email: '',
+            address: '',
+          });
+        } else {
+          throw error;
+        }
+      }
+      // Re-throw other errors
+      throw error;
     }
-    return result;
   }
 
   async updateCustomer(

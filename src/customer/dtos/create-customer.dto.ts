@@ -2,16 +2,18 @@ import {
   IsEmail,
   IsNotEmpty,
   IsNumberString,
+  IsOptional,
   IsString,
   MaxLength,
   MinLength,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+
 export class CreateCustomerDto {
   @ApiProperty()
   @IsNotEmpty()
   @IsString()
-  name: string;
+  customerName: string;
 
   @ApiProperty()
   @IsNotEmpty()
@@ -21,12 +23,12 @@ export class CreateCustomerDto {
   phoneNumber: number;
 
   @ApiProperty()
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
-  address: string;
+  address?: string;
 
   @ApiProperty()
-  @IsNotEmpty()
+  @IsOptional()
   @IsEmail()
-  email: string;
+  email?: string;
 }

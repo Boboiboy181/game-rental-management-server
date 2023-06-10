@@ -25,7 +25,7 @@ export class CustomerController {
   constructor(private readonly customerService: CustomerService) {}
 
   @Post()
-  @ApiCreatedResponse({type:Customer})
+  @ApiCreatedResponse({ type: Customer })
   create(@Body() createCustomerDto: CreateCustomerDto): Promise<Customer> {
     return this.customerService.createCustomer(createCustomerDto);
   }

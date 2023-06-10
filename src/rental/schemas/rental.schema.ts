@@ -2,13 +2,15 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Schema as MongooseSchema } from 'mongoose';
 import { RentalDaysEnum } from '../../pre-order/enums/rental-days.enum';
 import { VideoGame } from '../../video-game/schemas/video-game.schema';
+import { Customer } from '../../customer/schemas/customer.schema';
+import { ReturnStateEnum } from '../enums/return-state.enum';
 
 export type RentalDocument = HydratedDocument<Rental>;
 
 @Schema({ timestamps: true })
 export class Rental {
-  @Prop()
-  customerName: string;
+  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Customer' })
+  customer: Customer;
 
   @Prop()
   numberOfRentalDays: RentalDaysEnum;
@@ -29,6 +31,9 @@ export class Rental {
 
   @Prop()
   estimatedPrice: number;
+
+  @Prop()
+  returnState: ReturnStateEnum;
 }
 
 export const RentalSchema = SchemaFactory.createForClass(Rental);

@@ -12,6 +12,6 @@ import { CloudinaryModule } from 'src/cloudinary/cloudinary.module';
   ],
   controllers: [VideoGameController],
   providers: [VideoGameService],
-  exports: [MongooseModule],
+  exports: [VideoGameService, MongooseModule],
 })
 export class VideoGameModule {}
