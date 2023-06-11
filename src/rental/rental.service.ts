@@ -108,8 +108,20 @@ export class RentalService {
     return result;
   }
 
-  update(id: number, updateRentalDto: UpdateRentalDto) {
-    return `This action updates a #${id} rental`;
+  async updateRental(
+    id: string,
+    updateRentalDto: UpdateRentalDto,
+  ): Promise<Rental> {
+    const updated = await this.rentalModel.findByIdAndUpdate(
+      id,
+      updateRentalDto,
+      { new: true },
+    );
+    
+    if (!updated) {
+      throw new NotFoundException('Rental not found');
+    }
+    return updated;
   }
 
   async deleteRental(id: string): Promise<void> {

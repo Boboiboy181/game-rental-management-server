@@ -42,8 +42,9 @@ export class RentalController {
   }
 
   @Patch(':id')
+  @ApiOkResponse({ type: Rental })
   update(@Param('id') id: string, @Body() updateRentalDto: UpdateRentalDto) {
-    return this.rentalService.update(+id, updateRentalDto);
+    return this.rentalService.updateRental(id, updateRentalDto);
   }
 
   @Delete(':id')
