@@ -101,12 +101,9 @@ export class RentalService {
   async getRental(
     filterRentaldto: FilterRentalDto,
   ): Promise<Rental[]> {
-    const { rentalId,phoneNumber,customerName } = filterRentaldto;
+    const { phoneNumber,customerName } = filterRentaldto;
     const query = this.rentalModel.find();
     query.setOptions({ lean: true });
-    if (rentalId) {
-      query.where({ rentalId: { $regex: rentalId, $options: 'i' } });
-    }
     if (customerName) {
       query.where({ customerName: { $regex: customerName, $options: 'i' } });
     }

@@ -9,11 +9,7 @@ import {
   } from 'class-validator';
   
   export class FilterRentalDto {
-    @ApiPropertyOptional()
-    @IsOptional()
-    @IsString()
-    rentalId: string;
-  
+    
     @ApiPropertyOptional()
     @IsOptional()
     @IsNumberString()
