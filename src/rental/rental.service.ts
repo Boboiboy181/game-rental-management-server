@@ -132,7 +132,7 @@ export class RentalService {
     );
 
     if (!updated) {
-      throw new NotFoundException('Rental not found');
+      throw new NotFoundException(`Rental with id ${id} not found`);
     }
     return updated;
   }
