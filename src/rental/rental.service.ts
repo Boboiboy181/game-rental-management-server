@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateRentalDto } from './dtos/create-rental.dto';
 import { UpdateRentalDto } from './dtos/update-rental.dto';
 import { InjectModel } from '@nestjs/mongoose';
@@ -112,7 +112,11 @@ export class RentalService {
     return `This action updates a #${id} rental`;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} rental`;
+  async deleteRental(id: string): Promise<void> {
+    const result = await this.getRentalById(id);
+    if (!result) {
+      throw new NotFoundException(`Rental with id ${id} not found`);
+    }
+    await this.rentalModel.deleteOne({ _id: id }).exec();
   }
 }

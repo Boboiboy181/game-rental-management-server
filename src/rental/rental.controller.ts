@@ -10,12 +10,22 @@ import {
 import { RentalService } from './rental.service';
 import { CreateRentalDto } from './dtos/create-rental.dto';
 import { UpdateRentalDto } from './dtos/update-rental.dto';
+import { Rental } from './schemas/rental.schema';
+import {
+  ApiCreatedResponse,
+  ApiOkResponse,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 
+
+@ApiTags('rental')
 @Controller('rental')
 export class RentalController {
   constructor(private readonly rentalService: RentalService) {}
 
   @Post()
+  @ApiCreatedResponse({ type: Rental })
   createRental(@Body() createRentalDto: CreateRentalDto) {
     return this.rentalService.createRental(createRentalDto);
   }
@@ -26,6 +36,7 @@ export class RentalController {
   }
 
   @Get(':id')
+  @ApiOkResponse({ type: Rental })
   getRentalById(@Param('id') id: string) {
     return this.rentalService.getRentalById(id);
   }
@@ -36,7 +47,8 @@ export class RentalController {
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.rentalService.remove(+id);
+  @ApiResponse({ status: 204, description: 'Delete success' })
+  async deleteCustomer(@Param('id') id: string): Promise<void> {
+    await this.rentalService.deleteRental(id);
   }
 }
