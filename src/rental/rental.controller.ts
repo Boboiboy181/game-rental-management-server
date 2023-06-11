@@ -20,7 +20,6 @@ import {
 } from '@nestjs/swagger';
 import { FilterRentalDto } from './dtos/filter-rental.dto';
 
-
 @ApiTags('rental')
 @Controller('rental')
 export class RentalController {
@@ -34,9 +33,7 @@ export class RentalController {
 
   @Get()
   @ApiOkResponse({ type: [Rental] })
-  getRental(
-    @Query() filterRentalDto: FilterRentalDto,
-  ): Promise<Rental[]> {
+  getRental(@Query() filterRentalDto: FilterRentalDto): Promise<Rental[]> {
     return this.rentalService.getRental(filterRentalDto);
   }
 

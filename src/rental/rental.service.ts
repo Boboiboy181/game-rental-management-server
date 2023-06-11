@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateRentalDto } from './dtos/create-rental.dto';
 import { UpdateRentalDto } from './dtos/update-rental.dto';
 import { InjectModel } from '@nestjs/mongoose';
@@ -8,7 +12,6 @@ import { RentalDaysEnum } from '../pre-order/enums/rental-days.enum';
 import { VideoGameService } from '../video-game/video-game.service';
 import { CustomerService } from '../customer/customer.service';
 import { ReturnStateEnum } from './enums/return-state.enum';
-import { FilterCustomerDto } from 'src/customer/dtos/filter-customer.dto';
 import { FilterRentalDto } from './dtos/filter-rental.dto';
 
 @Injectable()
@@ -98,10 +101,8 @@ export class RentalService {
     return await rental.save();
   }
 
-  async getRental(
-    filterRentaldto: FilterRentalDto,
-  ): Promise<Rental[]> {
-    const { phoneNumber,customerName } = filterRentaldto;
+  async getRental(filterRentaldto: FilterRentalDto): Promise<Rental[]> {
+    const { phoneNumber, customerName } = filterRentaldto;
     const query = this.rentalModel.find();
     query.setOptions({ lean: true });
     if (customerName) {
