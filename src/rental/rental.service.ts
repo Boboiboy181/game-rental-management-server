@@ -8,6 +8,8 @@ import { RentalDaysEnum } from '../pre-order/enums/rental-days.enum';
 import { VideoGameService } from '../video-game/video-game.service';
 import { CustomerService } from '../customer/customer.service';
 import { ReturnStateEnum } from './enums/return-state.enum';
+import { FilterCustomerDto } from 'src/customer/dtos/filter-customer.dto';
+import { FilterRentalDto } from './dtos/filter-rental.dto';
 
 @Injectable()
 export class RentalService {
@@ -96,8 +98,22 @@ export class RentalService {
     return await rental.save();
   }
 
-  findAll() {
-    return `This action returns all rental`;
+  async getRental(
+    filterRentaldto: FilterRentalDto,
+  ): Promise<Rental[]> {
+    const { rentalId,phoneNumber,customerName } = filterRentaldto;
+    const query = this.rentalModel.find();
+    query.setOptions({ lean: true });
+    if (rentalId) {
+      query.where({ rentalId: { $regex: rentalId, $options: 'i' } });
+    }
+    if (customerName) {
+      query.where({ customerName: { $regex: customerName, $options: 'i' } });
+    }
+    if (phoneNumber) {
+      query.where({ phoneNumber: { $regex: phoneNumber, $options: 'i' } });
+    }
+    return await query.exec();
   }
 
   async getRentalById(id: string): Promise<Rental> {
@@ -117,7 +133,7 @@ export class RentalService {
       updateRentalDto,
       { new: true },
     );
-    
+
     if (!updated) {
       throw new NotFoundException('Rental not found');
     }

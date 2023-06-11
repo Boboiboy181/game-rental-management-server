@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import { RentalService } from './rental.service';
 import { CreateRentalDto } from './dtos/create-rental.dto';
@@ -17,6 +18,7 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { FilterRentalDto } from './dtos/filter-rental.dto';
 
 
 @ApiTags('rental')
@@ -31,8 +33,11 @@ export class RentalController {
   }
 
   @Get()
-  findAll() {
-    return this.rentalService.findAll();
+  @ApiOkResponse({ type: [Rental] })
+  getRental(
+    @Query() filterRentalDto: FilterRentalDto,
+  ): Promise<Rental[]> {
+    return this.rentalService.getRental(filterRentalDto);
   }
 
   @Get(':id')
