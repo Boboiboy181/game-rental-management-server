@@ -16,8 +16,8 @@ export class ReturnController {
   constructor(private readonly returnService: ReturnService) {}
 
   @Post()
-  create(@Body() createReturnDto: CreateReturnDto) {
-    return this.returnService.create(createReturnDto);
+  createReturnTicket(@Body() createReturnDto: CreateReturnDto) {
+    return this.returnService.createReturnTicket(createReturnDto);
   }
 
   @Get()
@@ -26,8 +26,8 @@ export class ReturnController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.returnService.findOne(+id);
+  getReturnTicketById(@Param('id') id: string) {
+    return this.returnService.getReturnTicketById(id);
   }
 
   @Patch(':id')

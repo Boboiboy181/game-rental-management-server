@@ -31,6 +31,9 @@ export class Return {
   rentedGames: [{ game: VideoGame; quantity: number }];
 
   @Prop()
+  fine: number;
+
+  @Prop()
   deposit: number;
 
   @Prop()
