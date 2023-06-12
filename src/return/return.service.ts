@@ -96,8 +96,12 @@ export class ReturnService {
     return `This action returns all return`;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} return`;
+  async getReturnTicketById(id: string): Promise<Return> {
+    const returnTicket = await this.returnlModel.findById(id).exec();
+    if (!returnTicket) {
+      throw new Error(`Return ticket with ${id} not found`);
+    }
+    return returnTicket;
   }
 
   update(id: number, updateReturnDto: UpdateReturnDto) {

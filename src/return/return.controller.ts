@@ -26,8 +26,8 @@ export class ReturnController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.returnService.findOne(+id);
+  getReturnTicketById(@Param('id') id: string) {
+    return this.returnService.getReturnTicketById(id);
   }
 
   @Patch(':id')
