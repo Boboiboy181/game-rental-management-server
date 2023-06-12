@@ -109,27 +109,28 @@ export class RentalPackageService {
       });
 
       if (!rentalPackage) {
-        
-        throw new NotFoundException(`Rental Package with id ${packageName} not found`);
+        throw new NotFoundException(
+          `Rental Package with id ${packageName} not found`,
+        );
       }
       // Lấy id
-      const rentalPackageid: string = rentalPackage._id.toHexString();
-      query.where('rentalPackage').equals(rentalPackageid);
-      console.log(rentalPackageid)
+      const rentalPackage_id: string = rentalPackage._id.toHexString();
+      query.where('rentalPackage').equals(rentalPackage_id);
     }
     // Sẽ tìm package name có trong CSDL KH
-     if (phoneNumber) {
-       const customer = await this.customerModel.findOne({
-         phoneNumber: { $regex: phoneNumber, $options: 'i' },
-       });
+    if (phoneNumber) {
+      const customer = await this.customerModel.findOne({
+        phoneNumber: { $regex: phoneNumber, $options: 'i' },
+      });
 
-       if (!customer) {
-         throw new NotFoundException(`Rental Package with customer's name: ${phoneNumber} not found`);
-       }
-       const customerid: string = customer._id.toHexString();
-       query.where('customer').equals(customerid);
-       console.log(customerid)
-     }
+      if (!customer) {
+        throw new NotFoundException(
+          `Rental Package with customer's name: ${phoneNumber} not found`,
+        );
+      }
+      const customer_id: string = customer._id.toHexString();
+      query.where('customer').equals(customer_id);
+    }
     // Sẽ tìm package name có trong CSDL KH
     if (name) {
       const customer = await this.customerModel.findOne({
@@ -137,16 +138,19 @@ export class RentalPackageService {
       });
 
       if (!customer) {
-        throw new NotFoundException(`Rental Package with customer's name: ${name} not found`);
+        throw new NotFoundException(
+          `Rental Package with customer's name: ${name} not found`,
+        );
       }
       const customer_id: string = customer._id.toHexString();
       query.where('customer').equals(customer_id);
-      console.log(customer_id)
     }
 
     const results = await query.exec();
-    if(results.length === 0){
-      throw new NotFoundException(`Rental Package Registeration cannot be found`);
+    if (results.length === 0) {
+      throw new NotFoundException(
+        `Rental Package Registeration cannot be found`,
+      );
     }
     return results;
   }
