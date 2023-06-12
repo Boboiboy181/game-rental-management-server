@@ -8,6 +8,7 @@ import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { CustomerModule } from './customer/customer.module';
 import { PreOrderModule } from './pre-order/pre-order.module';
 import { RentalPackageModule } from './rental-package/rental-package.module';
+import { RentalModule } from './rental/rental.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { RentalPackageModule } from './rental-package/rental-package.module';
     CustomerModule,
     PreOrderModule,
     RentalPackageModule,
+    RentalModule,
   ],
 })
 export class AppModule {}
