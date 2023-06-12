@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateRentalDto } from './dtos/create-rental.dto';
 import { UpdateRentalDto } from './dtos/update-rental.dto';
 import { InjectModel } from '@nestjs/mongoose';
@@ -8,6 +12,7 @@ import { RentalDaysEnum } from '../pre-order/enums/rental-days.enum';
 import { VideoGameService } from '../video-game/video-game.service';
 import { CustomerService } from '../customer/customer.service';
 import { ReturnStateEnum } from './enums/return-state.enum';
+import { FilterRentalDto } from './dtos/filter-rental.dto';
 
 @Injectable()
 export class RentalService {
@@ -96,8 +101,17 @@ export class RentalService {
     return await rental.save();
   }
 
-  findAll() {
-    return `This action returns all rental`;
+  async getRental(filterRentaldto: FilterRentalDto): Promise<Rental[]> {
+    const { phoneNumber, customerName } = filterRentaldto;
+    const query = this.rentalModel.find();
+    query.setOptions({ lean: true });
+    if (customerName) {
+      query.where({ customerName: { $regex: customerName, $options: 'i' } });
+    }
+    if (phoneNumber) {
+      query.where({ phoneNumber: { $regex: phoneNumber, $options: 'i' } });
+    }
+    return await query.exec();
   }
 
   async getRentalById(id: string): Promise<Rental> {
@@ -108,11 +122,27 @@ export class RentalService {
     return result;
   }
 
-  update(id: number, updateRentalDto: UpdateRentalDto) {
-    return `This action updates a #${id} rental`;
+  async updateRental(
+    id: string,
+    updateRentalDto: UpdateRentalDto,
+  ): Promise<Rental> {
+    const updated = await this.rentalModel.findByIdAndUpdate(
+      id,
+      updateRentalDto,
+      { new: true },
+    );
+
+    if (!updated) {
+      throw new NotFoundException(`Rental with id ${id} not found`);
+    }
+    return updated;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} rental`;
+  async deleteRental(id: string): Promise<void> {
+    const result = await this.getRentalById(id);
+    if (!result) {
+      throw new NotFoundException(`Rental with id ${id} not found`);
+    }
+    await this.rentalModel.deleteOne({ _id: id }).exec();
   }
 }
