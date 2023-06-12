@@ -102,62 +102,57 @@ export class RentalPackageService {
     const query = this.rentalPackageRegistrationModel.find();
     query.setOptions({ lean: true });
 
-    // Sẽ tìm package name có trong CSDL
+    // Sẽ tìm package name có trong CSDL gói
     if (packageName) {
       const rentalPackage = await this.rentalPackageModel.findOne({
         packageName: { $regex: packageName, $options: 'i' },
       });
 
-      if (rentalPackage) {
-        // Nếu có sẽ lấy id
-        const rentalPackageId = rentalPackage._id;
-
-        query.populate({
-          // Kiểm tra id có không
-          path: 'rentalPackage',
-          match: { _id: rentalPackageId },
-        });
+      if (!rentalPackage) {
+        throw new NotFoundException(
+          `Rental Package with id ${packageName} not found`,
+        );
       }
-      else {
-        throw new NotFoundException(`Rental Package with id ${packageName} not found`);
-      }
+      // Lấy id
+      const rentalPackage_id: string = rentalPackage._id.toHexString();
+      query.where('rentalPackage').equals(rentalPackage_id);
     }
-    if (name) {
-      const customer = await this.customerModel.findOne({
-        name: { $regex: name, $options: 'i' },
-      });
-
-      if (customer) {
-        const customerId = customer._id;
-
-        query.populate({
-          path: 'customer',
-          match: { _id: customerId },
-        });
-      }
-      else{
-        throw new NotFoundException(`Rental Package with customer's name: ${name} not found`);
-      }
-    }
+    // Sẽ tìm package name có trong CSDL KH
     if (phoneNumber) {
       const customer = await this.customerModel.findOne({
         phoneNumber: { $regex: phoneNumber, $options: 'i' },
       });
 
-      if (customer) {
-        const customerId = customer._id;
-
-        query.populate({
-          path: 'customer',
-          match: { _id: customerId },
-        });
+      if (!customer) {
+        throw new NotFoundException(
+          `Rental Package with customer's name: ${phoneNumber} not found`,
+        );
       }
-      else
-      {
-        throw new NotFoundException(`Rental Package with phone number ${phoneNumber} not found`);
-      }
+      const customer_id: string = customer._id.toHexString();
+      query.where('customer').equals(customer_id);
     }
-    return await query.exec();
+    // Sẽ tìm package name có trong CSDL KH
+    if (name) {
+      const customer = await this.customerModel.findOne({
+        name: { $regex: name, $options: 'i' },
+      });
+
+      if (!customer) {
+        throw new NotFoundException(
+          `Rental Package with customer's name: ${name} not found`,
+        );
+      }
+      const customer_id: string = customer._id.toHexString();
+      query.where('customer').equals(customer_id);
+    }
+
+    const results = await query.exec();
+    if (results.length === 0) {
+      throw new NotFoundException(
+        `Rental Package Registeration cannot be found`,
+      );
+    }
+    return results;
   }
 
   async updateRentalPackage(
