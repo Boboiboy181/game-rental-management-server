@@ -117,7 +117,7 @@ export class RentalService {
   async getRentalById(id: string): Promise<Rental> {
     const result = await this.rentalModel.findById(id).exec();
     if (!result) {
-      throw new Error(`Rental with id ${id} not found`);
+      throw new NotFoundException(`Rental with id ${id} not found`);
     }
     return result;
   }
