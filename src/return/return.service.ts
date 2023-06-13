@@ -108,6 +108,22 @@ export class ReturnService {
     return `This action updates a #${id} return`;
   }
 
+  async updateReturnTicket(
+    id: string,
+    updateReturnDto: UpdateReturnDto,
+  ): Promise<Return> {
+    const updated = await this.returnlModel.findByIdAndUpdate(
+      id,
+      updateReturnDto,
+      { new: true },
+    );
+
+    if (!updated) {
+      throw new NotFoundException(`Return ticket with ${id} not found`);
+    }
+    return updated;
+  }
+
   async deleteReturnTicket(id: string): Promise<void> {
     const result = await this.getReturnTicketById(id);
     if (!result) {

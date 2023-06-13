@@ -32,7 +32,7 @@ export class ReturnController {
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateReturnDto: UpdateReturnDto) {
-    return this.returnService.update(+id, updateReturnDto);
+    return this.returnService.updateReturnTicket(id, updateReturnDto);
   }
 
   @Delete(':id')
