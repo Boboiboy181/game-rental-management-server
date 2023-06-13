@@ -36,7 +36,7 @@ export class ReturnController {
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.returnService.remove(+id);
+  async deleteReturnTicket(@Param('id') id: string): Promise<void> {
+    await this.returnService.deleteReturnTicket(id);
   }
 }

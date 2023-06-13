@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateReturnDto } from './dtos/create-return.dto';
 import { UpdateReturnDto } from './dtos/update-return.dto';
 import { InjectModel } from '@nestjs/mongoose';
@@ -108,7 +108,11 @@ export class ReturnService {
     return `This action updates a #${id} return`;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} return`;
+  async deleteReturnTicket(id: string): Promise<void> {
+    const result = await this.getReturnTicketById(id);
+    if (!result) {
+      throw new NotFoundException(`Return ticket with id ${id} not found`);
+    }
+    await this.returnlModel.deleteOne({ _id: id }).exec();
   }
 }
