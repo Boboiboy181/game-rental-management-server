@@ -13,11 +13,13 @@ import { VideoGameService } from '../video-game/video-game.service';
 import { CustomerService } from '../customer/customer.service';
 import { ReturnStateEnum } from './enums/return-state.enum';
 import { FilterRentalDto } from './dtos/filter-rental.dto';
+import { Customer } from 'src/customer/schemas/customer.schema';
 
 @Injectable()
 export class RentalService {
   constructor(
     @InjectModel('Rental') private readonly rentalModel: Model<Rental>,
+    @InjectModel('Customer') private readonly customerModel: Model<Customer>,
     private readonly videoGameService: VideoGameService,
     private readonly customerService: CustomerService,
   ) {}
@@ -102,16 +104,37 @@ export class RentalService {
   }
 
   async getRental(filterRentaldto: FilterRentalDto): Promise<Rental[]> {
-    const { phoneNumber, customerName } = filterRentaldto;
+    const { phoneNumber, name } = filterRentaldto;
     const query = this.rentalModel.find();
     query.setOptions({ lean: true });
-    if (customerName) {
-      query.where({ customerName: { $regex: customerName, $options: 'i' } });
-    }
+    if (name) {
+      const customer = await this.customerModel.findOne({
+        customerName: { $regex: name, $options: 'i' },
+       });
+       console.log(customer)
+       if (!customer) {
+         throw new NotFoundException(`Rental Form with customer's name: ${name} not found`);
+       }
+       const customer_id: string = customer._id.toHexString();
+       query.where('customer').equals(customer_id);
+     }
     if (phoneNumber) {
-      query.where({ phoneNumber: { $regex: phoneNumber, $options: 'i' } });
+      const customer = await this.customerModel.findOne({
+        phoneNumber: { $regex: phoneNumber, $options: 'i' },
+      });
+      if (!customer) {
+        throw new NotFoundException(`Rental Form with customer's name: ${phoneNumber} not found`);
+      }
+      const customerid: string = customer._id.toHexString();
+      query.where('customer').equals(customerid);
     }
-    return await query.exec();
+   // Sẽ tìm package name có trong CSDL KH
+
+   const results = await query.exec();
+   if(results.length === 0){
+     throw new NotFoundException(`Rental Form cannot be found`);
+   }
+   return results;
   }
 
   async getRentalById(id: string): Promise<Rental> {

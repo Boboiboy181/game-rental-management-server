@@ -19,5 +19,5 @@ export class FilterRentalDto {
   @ApiPropertyOptional()
   @IsOptional()
   @IsString()
-  customerName: string;
+  name: string;
 }
