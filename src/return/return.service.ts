@@ -101,11 +101,9 @@ export class ReturnService {
     query.setOptions({ lean: true });
 
     if (name) {
-      console.log(name) //Testing bugs
       const customer = await this.customerModel.findOne({
         customerName: { $regex: name, $options: 'i' },
       });
-      console.log(customer) //Testing bugs
       if (!customer) {
         throw new NotFoundException(
           `Return form with customer's name: ${name} not found`,
@@ -118,7 +116,6 @@ export class ReturnService {
       const customer = await this.customerModel.findOne({
         phoneNumber: { $regex: phoneNumber, $options: 'i' },
       });
-      console.log(customer)
       if (!customer) {
         throw new NotFoundException(
           `Return form with customer's phone number: ${phoneNumber} not found`,

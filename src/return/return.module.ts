@@ -4,10 +4,7 @@ import { ReturnController } from './return.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ReturnSchema } from './schemas/return.schema';
 import { RentalModule } from 'src/rental/rental.module';
-import { RentalService } from 'src/rental/rental.service';
 import { VideoGameModule } from 'src/video-game/video-game.module';
-import { VideoGameService } from 'src/video-game/video-game.service';
-import { Customer } from 'src/customer/schemas/customer.schema';
 import { CustomerModule } from 'src/customer/customer.module';
 
 @Module({
@@ -18,6 +15,6 @@ import { CustomerModule } from 'src/customer/customer.module';
     CustomerModule,
   ],
   controllers: [ReturnController],
-  providers: [ReturnService, VideoGameService,Customer],
+  providers: [ReturnService],
 })
 export class ReturnModule {}

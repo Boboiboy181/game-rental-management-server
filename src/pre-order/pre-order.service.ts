@@ -77,9 +77,9 @@ export class PreOrderService {
     return await this.preOrderModel.findById(id).exec();
   }
 
-  update(id: number, updatePreOrderDto: UpdatePreOrderDto) {
-    return `This action updates a #${id} preOrder`;
-  }
+  // update(id: number, updatePreOrderDto: UpdatePreOrderDto) {
+  //   return `This action updates a #${id} preOrder`;
+  // }
 
   async deletePreOrder(id: string): Promise<void> {
     const result = await this.getPreOrderById(id);
