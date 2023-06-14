@@ -16,5 +16,6 @@ import { CustomerService } from '../customer/customer.service';
   ],
   controllers: [RentalController],
   providers: [RentalService, VideoGameService, CustomerService],
+  exports: [RentalService],
 })
 export class RentalModule {}
