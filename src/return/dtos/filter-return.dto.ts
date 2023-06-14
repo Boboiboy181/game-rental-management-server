@@ -18,5 +18,5 @@ export class FilterReturnDto {
   @ApiPropertyOptional()
   @IsOptional()
   @IsString()
-  customerName?: string;
+  name?: string;
 }

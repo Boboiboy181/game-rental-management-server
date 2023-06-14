@@ -16,7 +16,7 @@ import { FilterReturnDto } from './dtos/filter-return.dto';
 export class ReturnService {
   constructor(
     @InjectModel('Return') private readonly returnlModel: Model<Return>,
-    @InjectModel('Customer')private readonly customerModel: Model<Customer>,
+    @InjectModel('Customer') private readonly customerModel: Model<Customer>,
     private readonly rentalService: RentalService,
     private readonly videoGameService: VideoGameService,
   ) {}
@@ -96,18 +96,19 @@ export class ReturnService {
   }
 
   async getReturnTicket(filterReturnDto: FilterReturnDto): Promise<Return[]> {
-    const { phoneNumber, customerName } = filterReturnDto;
-    
+    const { phoneNumber, name } = filterReturnDto;
     const query = this.returnlModel.find();
     query.setOptions({ lean: true });
 
-    if (customerName) {
+    if (name) {
+      console.log(name) //Testing bugs
       const customer = await this.customerModel.findOne({
-        name: { $regex: customerName, $options: 'i' },
-      })
+        customerName: { $regex: name, $options: 'i' },
+      });
+      console.log(customer) //Testing bugs
       if (!customer) {
         throw new NotFoundException(
-          `Return form with customer's name: ${customerName} not found`,
+          `Return form with customer's phone number: ${name} not found`,
         );
       }
       const customer_id: string = customer._id.toHexString();
@@ -117,7 +118,7 @@ export class ReturnService {
       const customer = await this.customerModel.findOne({
         phoneNumber: { $regex: phoneNumber, $options: 'i' },
       });
-
+      console.log(customer)
       if (!customer) {
         throw new NotFoundException(
           `Return form with customer's phone number: ${phoneNumber} not found`,
