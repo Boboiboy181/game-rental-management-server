@@ -1,19 +1,22 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateReturnDto } from './dtos/create-return.dto';
 import { UpdateReturnDto } from './dtos/update-return.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Return } from './schemas/return.schema';
+import { Customer } from 'src/customer/schemas/customer.schema';
 import { RentalService } from 'src/rental/rental.service';
 import { PaymentStateEnum } from './enum/payment-state.enum';
 import { VideoGameService } from 'src/video-game/video-game.service';
 import { RentalDaysEnum } from 'src/pre-order/enums/rental-days.enum';
 import { ReturnStateEnum } from 'src/rental/enums/return-state.enum';
+import { FilterReturnDto } from './dtos/filter-return.dto';
 
 @Injectable()
 export class ReturnService {
   constructor(
     @InjectModel('Return') private readonly returnlModel: Model<Return>,
+    @InjectModel('Customer') private readonly customerModel: Model<Customer>,
     private readonly rentalService: RentalService,
     private readonly videoGameService: VideoGameService,
   ) {}
@@ -92,8 +95,45 @@ export class ReturnService {
     return await returnTicket.save();
   }
 
-  findAll() {
-    return `This action returns all return`;
+  async getReturnTicket(filterReturnDto: FilterReturnDto): Promise<Return[]> {
+    const { phoneNumber, name } = filterReturnDto;
+    const query = this.returnlModel.find();
+    query.setOptions({ lean: true });
+
+    if (name) {
+      console.log(name) //Testing bugs
+      const customer = await this.customerModel.findOne({
+        customerName: { $regex: name, $options: 'i' },
+      });
+      console.log(customer) //Testing bugs
+      if (!customer) {
+        throw new NotFoundException(
+          `Return form with customer's name: ${name} not found`,
+        );
+      }
+      const customer_id: string = customer._id.toHexString();
+      query.where('customer').equals(customer_id);
+    }
+    if (phoneNumber) {
+      const customer = await this.customerModel.findOne({
+        phoneNumber: { $regex: phoneNumber, $options: 'i' },
+      });
+      console.log(customer)
+      if (!customer) {
+        throw new NotFoundException(
+          `Return form with customer's phone number: ${phoneNumber} not found`,
+        );
+      }
+      const customer_id: string = customer._id.toHexString();
+      query.where('customer').equals(customer_id);
+    }
+    const results = await query.exec();
+    if (results.length === 0) {
+      throw new NotFoundException(
+        `Rental Package Registeration cannot be found`,
+      );
+    }
+    return results;
   }
 
   async getReturnTicketById(id: string): Promise<Return> {
@@ -104,11 +144,27 @@ export class ReturnService {
     return returnTicket;
   }
 
-  update(id: number, updateReturnDto: UpdateReturnDto) {
-    return `This action updates a #${id} return`;
+  async updateReturnTicket(
+    id: string,
+    updateReturnDto: UpdateReturnDto,
+  ): Promise<Return> {
+    const updated = await this.returnlModel.findByIdAndUpdate(
+      id,
+      updateReturnDto,
+      { new: true },
+    );
+
+    if (!updated) {
+      throw new NotFoundException(`Return ticket with ${id} not found`);
+    }
+    return updated;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} return`;
+  async deleteReturnTicket(id: string): Promise<void> {
+    const result = await this.getReturnTicketById(id);
+    if (!result) {
+      throw new NotFoundException(`Return ticket with id ${id} not found`);
+    }
+    await this.returnlModel.deleteOne({ _id: id }).exec();
   }
 }
