@@ -4,16 +4,19 @@ import { UpdateReturnDto } from './dtos/update-return.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Return } from './schemas/return.schema';
+import { Customer } from 'src/customer/schemas/customer.schema';
 import { RentalService } from 'src/rental/rental.service';
 import { PaymentStateEnum } from './enum/payment-state.enum';
 import { VideoGameService } from 'src/video-game/video-game.service';
 import { RentalDaysEnum } from 'src/pre-order/enums/rental-days.enum';
 import { ReturnStateEnum } from 'src/rental/enums/return-state.enum';
+import { FilterReturnDto } from './dtos/filter-return.dto';
 
 @Injectable()
 export class ReturnService {
   constructor(
     @InjectModel('Return') private readonly returnlModel: Model<Return>,
+    @InjectModel('Customer')private readonly customerModel: Model<Customer>,
     private readonly rentalService: RentalService,
     private readonly videoGameService: VideoGameService,
   ) {}
@@ -92,8 +95,44 @@ export class ReturnService {
     return await returnTicket.save();
   }
 
-  findAll() {
-    return `This action returns all return`;
+  async getReturnTicket(filterReturnDto: FilterReturnDto): Promise<Return[]> {
+    const { phoneNumber, customerName } = filterReturnDto;
+    
+    const query = this.returnlModel.find();
+    query.setOptions({ lean: true });
+
+    if (customerName) {
+      const customer = await this.customerModel.findOne({
+        name: { $regex: customerName, $options: 'i' },
+      })
+      if (!customer) {
+        throw new NotFoundException(
+          `Return form with customer's name: ${customerName} not found`,
+        );
+      }
+      const customer_id: string = customer._id.toHexString();
+      query.where('customer').equals(customer_id);
+    }
+    if (phoneNumber) {
+      const customer = await this.customerModel.findOne({
+        phoneNumber: { $regex: phoneNumber, $options: 'i' },
+      });
+
+      if (!customer) {
+        throw new NotFoundException(
+          `Return form with customer's phone number: ${phoneNumber} not found`,
+        );
+      }
+      const customer_id: string = customer._id.toHexString();
+      query.where('customer').equals(customer_id);
+    }
+    const results = await query.exec();
+    if (results.length === 0) {
+      throw new NotFoundException(
+        `Rental Package Registeration cannot be found`,
+      );
+    }
+    return results;
   }
 
   async getReturnTicketById(id: string): Promise<Return> {
@@ -102,10 +141,6 @@ export class ReturnService {
       throw new Error(`Return ticket with ${id} not found`);
     }
     return returnTicket;
-  }
-
-  update(id: number, updateReturnDto: UpdateReturnDto) {
-    return `This action updates a #${id} return`;
   }
 
   async updateReturnTicket(

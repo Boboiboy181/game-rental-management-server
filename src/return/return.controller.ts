@@ -6,10 +6,12 @@ import {
   Patch,
   Param,
   Delete,
+  Query
 } from '@nestjs/common';
 import { ReturnService } from './return.service';
 import { CreateReturnDto } from './dtos/create-return.dto';
 import { UpdateReturnDto } from './dtos/update-return.dto';
+import { FilterReturnDto } from './dtos/filter-return.dto';
 
 @Controller('return')
 export class ReturnController {
@@ -21,8 +23,8 @@ export class ReturnController {
   }
 
   @Get()
-  findAll() {
-    return this.returnService.findAll();
+  getReturnTicket(@Query() filterReturnDto: FilterReturnDto) {
+    return this.returnService.getReturnTicket(filterReturnDto);
   }
 
   @Get(':id')
