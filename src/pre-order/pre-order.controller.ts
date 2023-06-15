@@ -10,9 +10,11 @@ import {
 import { PreOrderService } from './pre-order.service';
 import { CreatePreOrderDto } from './dtos/create-pre-order.dto';
 import { UpdatePreOrderDto } from './dtos/update-pre-order.dto';
-import { ApiTags, ApiResponse, ApiOkResponse } from '@nestjs/swagger';
+import { ApiTags, ApiResponse, ApiOkResponse, ApiBody } from '@nestjs/swagger';
 import { PreOrder } from './schemas/pre-order.schema';
 import { FilterPreOrderDto } from './dtos/filter-pre-order.dto';
+import { string } from 'joi';
+import { RentalDaysEnum } from './enums/rental-days.enum';
 
 @ApiTags('pre-order')
 @Controller('pre-order')
@@ -20,6 +22,27 @@ export class PreOrderController {
   constructor(private readonly preOrderService: PreOrderService) {}
 
   @Post()
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        customerID: { type: 'string' },
+        phoneNumber: { type: 'number' },
+        customerName: { type: 'string' },
+        numberOfRentalDays: { enum: Object.values(RentalDaysEnum) },
+        rentedGames: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              gameID: { type: 'string' },
+              preOrderQuantity: { type: 'number' },
+            },
+          },
+        },
+      },
+    },
+  })
   createPreOrder(@Body() createPreOrderDto: CreatePreOrderDto) {
     return this.preOrderService.createPreOrder(createPreOrderDto);
   }
