@@ -10,6 +10,7 @@ import { PreOrderModule } from './pre-order/pre-order.module';
 import { RentalPackageModule } from './rental-package/rental-package.module';
 import { RentalModule } from './rental/rental.module';
 import { ReturnModule } from './return/return.module';
+import { InvoiceModule } from './invoice/invoice.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { ReturnModule } from './return/return.module';
     RentalPackageModule,
     RentalModule,
     ReturnModule,
+    InvoiceModule,
   ],
 })
 export class AppModule {}
