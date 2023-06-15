@@ -1,7 +1,25 @@
-import { IsEnum, IsNotEmpty, IsString } from 'class-validator';
+import {
+  IsEnum,
+  IsNotEmpty,
+  IsNumberString,
+  IsOptional,
+  IsString,
+  MaxLength,
+  MinLength,
+} from 'class-validator';
 import { RentalDaysEnum } from '../enums/rental-days.enum';
 
 export class CreatePreOrderDto {
+  @IsOptional()
+  @IsString()
+  customerID?: string;
+
+  @IsNotEmpty()
+  @IsNumberString()
+  @MaxLength(10)
+  @MinLength(10)
+  phoneNumber: number;
+
   @IsNotEmpty()
   @IsString()
   customerName: string;
@@ -11,5 +29,5 @@ export class CreatePreOrderDto {
   numberOfRentalDays: RentalDaysEnum;
 
   @IsNotEmpty()
-  rentedGames: [{ game: string; quantity: number }];
+  rentedGames: [{ gameID: string; preOrderQuantity: number }];
 }
