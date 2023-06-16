@@ -26,8 +26,8 @@ export class InvoiceController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.invoiceService.findOne(+id);
+  getInvoiceByID(@Param('id') id: string) {
+    return this.invoiceService.getInvoiceByID(id);
   }
 
   @Patch(':id')
