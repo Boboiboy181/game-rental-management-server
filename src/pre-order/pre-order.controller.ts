@@ -13,7 +13,6 @@ import { UpdatePreOrderDto } from './dtos/update-pre-order.dto';
 import { ApiTags, ApiResponse, ApiOkResponse, ApiBody } from '@nestjs/swagger';
 import { PreOrder } from './schemas/pre-order.schema';
 import { FilterPreOrderDto } from './dtos/filter-pre-order.dto';
-import { string } from 'joi';
 import { RentalDaysEnum } from './enums/rental-days.enum';
 
 @ApiTags('pre-order')

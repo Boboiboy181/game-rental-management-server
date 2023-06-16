@@ -1,5 +1,4 @@
 import {
-  IsEnum,
   IsNotEmpty,
   IsNumberString,
   IsOptional,
@@ -7,7 +6,6 @@ import {
   MaxLength,
   MinLength,
 } from 'class-validator';
-import { RentalDaysEnum } from '../enums/rental-days.enum';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreatePreOrderDto {
@@ -30,10 +28,11 @@ export class CreatePreOrderDto {
 
   @ApiProperty()
   @IsNotEmpty()
-  @IsEnum(RentalDaysEnum)
-  numberOfRentalDays: RentalDaysEnum;
-
-  @ApiProperty()
-  @IsNotEmpty()
-  rentedGames: [{ gameID: string; preOrderQuantity: number }];
+  rentedGames: [
+    {
+      gameID: string;
+      preOrderQuantity: number;
+      numberOfRentalDays: string;
+    },
+  ];
 }
