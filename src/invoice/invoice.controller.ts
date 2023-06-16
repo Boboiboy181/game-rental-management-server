@@ -16,8 +16,8 @@ export class InvoiceController {
   constructor(private readonly invoiceService: InvoiceService) {}
 
   @Post()
-  create(@Body() createInvoiceDto: CreateInvoiceDto) {
-    return this.invoiceService.create(createInvoiceDto);
+  createInvoice(@Body() createInvoiceDto: CreateInvoiceDto) {
+    return this.invoiceService.createInvoice(createInvoiceDto);
   }
 
   @Get()

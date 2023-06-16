@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateInvoiceDto } from './dtos/create-invoice.dto';
 import { UpdateInvoiceDto } from './dtos/update-invoice.dto';
 import { InjectModel } from '@nestjs/mongoose';
@@ -14,7 +14,7 @@ export class InvoiceService {
     private readonly returnService: ReturnService,
   ) {}
 
-  async create(createInvoiceDto: CreateInvoiceDto): Promise<Invoice> {
+  async createInvoice(createInvoiceDto: CreateInvoiceDto): Promise<Invoice> {
     const { returnTicketID } = createInvoiceDto;
     const returnTicket = await this.returnService.getReturnTicketById(
       returnTicketID,
@@ -39,8 +39,12 @@ export class InvoiceService {
     return `This action returns all invoice`;
   }
 
-  async getInvoiceByID(id: string) {
-    return 'This action returns a #${id} invoice';
+  async getInvoiceByID(id: string): Promise<Invoice> {
+    const result = await this.invoiceModel.findById(id).exec();
+    if (!result) {
+      throw new NotFoundException(`Could not find invoice with ${id}`);
+    }
+    return result;
   }
 
   update(id: number, updateInvoiceDto: UpdateInvoiceDto) {
