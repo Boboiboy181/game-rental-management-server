@@ -6,11 +6,13 @@ import { Model } from 'mongoose';
 import { Invoice } from './schemas/invoice.schema';
 import { ReturnService } from 'src/return/return.service';
 import { PaymentStateEnum } from 'src/return/enum/payment-state.enum';
+import { Customer } from 'src/customer/schemas/customer.schema';
 
 @Injectable()
 export class InvoiceService {
   constructor(
     @InjectModel('Invoice') private readonly invoiceModel: Model<Invoice>,
+    @InjectModel('Customer') private readonly customerModel: Model<Customer>,
     private readonly returnService: ReturnService,
   ) {}
 
@@ -25,11 +27,10 @@ export class InvoiceService {
       fine: returnTicket.fine,
       finalPrice: returnTicket.estimatedPrice,
     });
-
     await this.returnService.updateReturnTicket(returnTicketID, {
       paymentState: PaymentStateEnum.PAID,
     });
-
+    await this.addPoint(returnTicket.customer.toString(),returnTicket.estimatedPrice)
     return await invoice.save();
   }
 
@@ -71,5 +72,21 @@ export class InvoiceService {
       throw new NotFoundException(`Could not find invoice with ${id}`);
     }
     await this.invoiceModel.deleteOne({ _id: id }).exec();
+  }
+
+  async addPoint(customerId: string, transactionAmount: number): Promise<void> {
+    // Logic tính tiền giao dịch hóa đơn hiện tại
+
+    // Logic cộng điểm tích lũy
+    const customer = await this.customerModel.findById(customerId);
+
+    if (!customer) {
+      throw new Error('Customer with id ${id} not found');
+    }
+
+    const pointsEarned = Math.floor(transactionAmount / 100000); // Ví dụ: Mỗi 100,000 VNĐ giao dịch tích 1 điểm
+
+    customer.point += pointsEarned;
+    await customer.save();
   }
 }
