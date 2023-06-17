@@ -8,7 +8,6 @@ import { Customer } from 'src/customer/schemas/customer.schema';
 import { RentalService } from 'src/rental/rental.service';
 import { PaymentStateEnum } from './enum/payment-state.enum';
 import { VideoGameService } from 'src/video-game/video-game.service';
-import { RentalDaysEnum } from 'src/pre-order/enums/rental-days.enum';
 import { ReturnStateEnum } from 'src/rental/enums/return-state.enum';
 import { FilterReturnDto } from './dtos/filter-return.dto';
 
@@ -30,57 +29,50 @@ export class ReturnService {
       paymentState: PaymentStateEnum.NOT_PAID,
       rental,
       customer: rental.customer,
-      numberOfRentalDays: rental.numberOfRentalDays,
       deposit: rental.deposit,
-      returnDate: rental.returnDate,
     });
-    // caculate the overdue days
-    const daysPastDue =
-      new Date(Date.now()).getDate() - rental.returnDate.getDate();
-    returnTicket.daysPastDue = daysPastDue;
 
-    const totalGamesPrice = rentedGames.map(async (rentedGame) => {
-      const { gameId, quantity } = rentedGame;
+    const pricePerGame = rentedGames.map(async (rentedGame) => {
+      const { gameID, preOrderQuantity } = rentedGame;
+
+      let rentalGameIndex = 0;
+      const numberOfRentalDays =
+        rental.rentedGames[rentalGameIndex].numberOfRentalDays;
+      const returnDate = rental.rentedGames[rentalGameIndex].returnDate;
+      rentalGameIndex++;
+
+      const daysPastDue = Math.floor(
+        (Date.now() - returnDate.getTime()) / (1000 * 3600 * 24),
+      );
 
       // find game
-      const videoGame = await this.videoGameService.getVideoGameById(gameId);
-      // add game and update quantity
+      const videoGame = await this.videoGameService.getVideoGameById(gameID);
 
-      returnTicket.rentedGames.push({ game: videoGame, quantity });
-      await this.videoGameService.updateProduct(gameId, {
-        quantity: videoGame.quantity + quantity,
+      const returnFine = Math.floor(daysPastDue * 0.1 * videoGame.price);
+
+      // add game and update quantity
+      returnTicket.rentedGames.push({
+        game: videoGame,
+        preOrderQuantity,
+        numberOfRentalDays,
+        returnDate,
+        daysPastDue,
+        fine: returnFine,
+      });
+      await this.videoGameService.updateProduct(gameID, {
+        quantity: videoGame.quantity + preOrderQuantity,
       });
 
-      return videoGame.price * quantity;
+      return (
+        videoGame.price * preOrderQuantity * numberOfRentalDays + returnFine
+      );
     });
 
-    const totalPrice = (await Promise.all(totalGamesPrice)).reduce(
+    const totalPrice = (await Promise.all(pricePerGame)).reduce(
       (acc, price) => acc + price,
       0,
     );
-
-    switch (returnTicket.numberOfRentalDays) {
-      case RentalDaysEnum.ONE_DAY:
-        returnTicket.estimatedPrice = totalPrice;
-        break;
-      case RentalDaysEnum.THREE_DAYS:
-        returnTicket.estimatedPrice = totalPrice * 0.85;
-        break;
-      case RentalDaysEnum.SEVEN_DAYS:
-        returnTicket.estimatedPrice = totalPrice * 0.85;
-        break;
-      case RentalDaysEnum.THIRTY_DAYS:
-        returnTicket.estimatedPrice = totalPrice * 0.83;
-        break;
-      case RentalDaysEnum.SIXTY_DAYS:
-        returnTicket.estimatedPrice = totalPrice * 0.8;
-        break;
-      default:
-        rental.estimatedPrice = totalPrice;
-        break;
-    }
-
-    returnTicket.fine = Math.floor(returnTicket.daysPastDue * 0.1 * totalPrice);
+    returnTicket.estimatedPrice = totalPrice;
 
     if (returnTicket.estimatedPrice === rental.estimatedPrice) {
       this.rentalService.updateRental(rentalId, {

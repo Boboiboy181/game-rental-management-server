@@ -1,5 +1,4 @@
 import {
-  IsEnum,
   IsNotEmpty,
   IsNumber,
   IsNumberString,
@@ -11,11 +10,6 @@ import {
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateRentalDto {
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  preOrderId?: string;
-
   @ApiPropertyOptional()
   @IsOptional()
   @IsString()
