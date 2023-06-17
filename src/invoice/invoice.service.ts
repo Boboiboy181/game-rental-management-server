@@ -45,8 +45,19 @@ export class InvoiceService {
     return result;
   }
 
-  update(id: number, updateInvoiceDto: UpdateInvoiceDto) {
-    return `This action updates a #${id} invoice`;
+  async updateInvoice(
+    id: string,
+    updateInvoiceDto: UpdateInvoiceDto,
+  ): Promise<Invoice> {
+    const updated = await this.invoiceModel.findByIdAndUpdate(
+      id,
+      updateInvoiceDto,
+      { new: true },
+    );
+    if (!updated) {
+      throw new NotFoundException('Invoice not found');
+    }
+    return updated;
   }
 
   async deleteInvoice(id: string): Promise<void> {

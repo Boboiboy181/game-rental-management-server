@@ -10,6 +10,7 @@ import {
 import { InvoiceService } from './invoice.service';
 import { CreateInvoiceDto } from './dtos/create-invoice.dto';
 import { UpdateInvoiceDto } from './dtos/update-invoice.dto';
+import { Invoice } from './schemas/invoice.schema';
 
 @Controller('invoice')
 export class InvoiceController {
@@ -31,8 +32,11 @@ export class InvoiceController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateInvoiceDto: UpdateInvoiceDto) {
-    return this.invoiceService.update(+id, updateInvoiceDto);
+  update(
+    @Param('id') id: string,
+    @Body() updateInvoiceDto: UpdateInvoiceDto,
+  ): Promise<Invoice> {
+    return this.invoiceService.updateInvoice(id, updateInvoiceDto);
   }
 
   @Delete(':id')
