@@ -36,7 +36,7 @@ export class InvoiceController {
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.invoiceService.remove(+id);
+  async deleteInvoice(@Param('id') id: string): Promise<void> {
+    await this.invoiceService.deleteInvoice(id);
   }
 }

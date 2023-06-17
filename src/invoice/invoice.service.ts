@@ -49,7 +49,11 @@ export class InvoiceService {
     return `This action updates a #${id} invoice`;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} invoice`;
+  async deleteInvoice(id: string): Promise<void> {
+    const result = await this.getInvoiceByID(id);
+    if (!result) {
+      throw new NotFoundException(`Could not find invoice with ${id}`);
+    }
+    await this.invoiceModel.deleteOne({ _id: id }).exec();
   }
 }
