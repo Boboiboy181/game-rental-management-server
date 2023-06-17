@@ -1,28 +1,31 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Schema as MongooseSchema } from 'mongoose';
 import { VideoGame } from 'src/video-game/schemas/video-game.schema';
-import { RentalDaysEnum } from '../enums/rental-days.enum';
+import { Customer } from 'src/customer/schemas/customer.schema';
 
 export type PreOrderDocument = HydratedDocument<PreOrder>;
 
 @Schema({ timestamps: true })
 export class PreOrder {
-  @Prop()
-  customerName: string;
-
-  @Prop()
-  numberOfRentalDays: RentalDaysEnum;
-
-  @Prop()
-  returnDate: Date;
+  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Customer' })
+  customer: Customer;
 
   @Prop([
     {
       game: { type: MongooseSchema.Types.ObjectId, ref: 'VideoGame' },
-      quantity: Number,
+      preOrderQuantity: Number,
+      numberOfRentalDays: Number,
+      returnDate: Date,
     },
   ])
-  rentedGames: [{ game: VideoGame; quantity: number }];
+  rentedGames: [
+    {
+      game: VideoGame;
+      preOrderQuantity: number;
+      numberOfRentalDays: number;
+      returnDate: Date;
+    },
+  ];
 
   @Prop()
   estimatedPrice: number;
@@ -31,4 +34,4 @@ export class PreOrder {
 export const PreOrderSchema = SchemaFactory.createForClass(PreOrder);
 
 // auto delete document after 6 hours
-PreOrderSchema.index({ createAt: 1 }, { expireAfterSeconds: 6 * 6 * 60 });
+PreOrderSchema.index({ createAt: 1 }, { expireAfterSeconds: 21600 });
