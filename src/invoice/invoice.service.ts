@@ -33,9 +33,14 @@ export class InvoiceService {
     return await invoice.save();
   }
 
-  findAll() {
-    return `This action returns all invoice`;
+  async getInvoice(): Promise<Invoice[]> {
+    const result = await this.invoiceModel.find().exec();
+    if (!result) {
+      throw new NotFoundException(`Could not find invoice `);
+    }
+    return result;
   }
+  
 
   async getInvoiceByID(id: string): Promise<Invoice> {
     const result = await this.invoiceModel.findById(id).exec();

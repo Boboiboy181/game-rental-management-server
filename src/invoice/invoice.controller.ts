@@ -22,8 +22,8 @@ export class InvoiceController {
   }
 
   @Get()
-  findAll() {
-    return this.invoiceService.findAll();
+  getInvoice() {
+    return this.invoiceService.getInvoice();
   }
 
   @Get(':id')
