@@ -26,11 +26,9 @@ export class InvoiceService {
       finalPrice: returnTicket.estimatedPrice,
     });
 
-    if (invoice.finalPrice === returnTicket.estimatedPrice) {
-      await this.returnService.updateReturnTicket(returnTicketID, {
-        paymentState: PaymentStateEnum.PAID,
-      });
-    }
+    await this.returnService.updateReturnTicket(returnTicketID, {
+      paymentState: PaymentStateEnum.PAID,
+    });
 
     return await invoice.save();
   }
