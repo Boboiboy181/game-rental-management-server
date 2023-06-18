@@ -84,7 +84,7 @@ export class InvoiceService {
       throw new Error('Customer with id ${id} not found');
     }
 
-    const pointsEarned = Math.floor(transactionAmount / 100000); // Ví dụ: Mỗi 100,000 VNĐ giao dịch tích 1 điểm
+    const pointsEarned = Math.floor(transactionAmount / 10000); // Ví dụ: Mỗi 10,000 VNĐ giao dịch tích 1 điểm
 
     customer.point += pointsEarned;
     await customer.save();
