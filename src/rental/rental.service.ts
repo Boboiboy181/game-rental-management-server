@@ -23,10 +23,10 @@ export class RentalService {
   ) {}
 
   async createRental(createRentalDto: CreateRentalDto): Promise<Rental> {
-    const { customerId, phoneNumber, customerName, rentedGames, deposit } =
+    const { customerID, phoneNumber, customerName, rentedGames, deposit } =
       createRentalDto;
     // find customer
-    const customer = await this.customerService.getCustomerById(customerId, {
+    const customer = await this.customerService.getCustomerById(customerID, {
       customerName,
       phoneNumber,
     });
@@ -34,6 +34,7 @@ export class RentalService {
     const rental = new this.rentalModel({
       customer,
       deposit,
+      returnValue: 0,
       returnState: ReturnStateEnum.NOT_RETURNED,
     });
     // find games and calculate total price
@@ -132,11 +133,9 @@ export class RentalService {
     id: string,
     updateRentalDto: UpdateRentalDto,
   ): Promise<Rental> {
-    const updated = await this.rentalModel.findByIdAndUpdate(
-      id,
-      updateRentalDto,
-      { new: true },
-    );
+    const updated = await this.rentalModel
+      .findByIdAndUpdate(id, updateRentalDto, { new: true })
+      .exec();
 
     if (!updated) {
       throw new NotFoundException(`Rental with id ${id} not found`);

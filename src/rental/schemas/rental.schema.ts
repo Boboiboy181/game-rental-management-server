@@ -35,6 +35,9 @@ export class Rental {
   estimatedPrice: number;
 
   @Prop()
+  returnValue: number;
+
+  @Prop()
   returnState: ReturnStateEnum;
 }
 

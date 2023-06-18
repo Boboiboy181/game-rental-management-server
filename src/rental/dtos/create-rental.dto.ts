@@ -13,7 +13,7 @@ export class CreateRentalDto {
   @ApiPropertyOptional()
   @IsOptional()
   @IsString()
-  customerId?: string;
+  customerID?: string;
 
   @ApiProperty()
   @IsNotEmpty()

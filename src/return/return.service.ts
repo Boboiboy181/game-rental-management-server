@@ -35,20 +35,24 @@ export class ReturnService {
     const pricePerGame = rentedGames.map(async (rentedGame) => {
       const { gameID, preOrderQuantity } = rentedGame;
 
-      let rentalGameIndex = 0;
-      const numberOfRentalDays =
-        rental.rentedGames[rentalGameIndex].numberOfRentalDays;
-      const returnDate = rental.rentedGames[rentalGameIndex].returnDate;
-      rentalGameIndex++;
+      // find game
+      const videoGame = await this.videoGameService.getVideoGameById(gameID);
+
+      const gameToBeReturned = rental.rentedGames.filter(
+        (rentedGame) => rentedGame.game.toString() === gameID,
+      );
+
+      const numberOfRentalDays = gameToBeReturned[0].numberOfRentalDays;
+      const returnDate = gameToBeReturned[0].returnDate;
 
       const daysPastDue = Math.floor(
         (Date.now() - returnDate.getTime()) / (1000 * 3600 * 24),
       );
 
-      // find game
-      const videoGame = await this.videoGameService.getVideoGameById(gameID);
-
-      const returnFine = Math.floor(daysPastDue * 0.1 * videoGame.price);
+      let returnFine = 0;
+      if (daysPastDue > 0) {
+        returnFine = Math.floor(daysPastDue * 0.1 * videoGame.price);
+      }
 
       // add game and update quantity
       returnTicket.rentedGames.push({
@@ -63,8 +67,33 @@ export class ReturnService {
         quantity: videoGame.quantity + preOrderQuantity,
       });
 
+      // calculate price per game
+      let videoGamePrice: number = videoGame.price;
+      switch (numberOfRentalDays) {
+        case 1:
+          videoGamePrice = videoGame.price;
+          break;
+        case 3:
+          videoGamePrice = videoGame.price * 0.89;
+          break;
+        case 7:
+          videoGamePrice = videoGame.price * 0.87;
+          break;
+        case 14:
+          videoGamePrice = videoGame.price * 0.85;
+          break;
+        case 30:
+          videoGamePrice = videoGame.price * 0.83;
+          break;
+        case 60:
+          videoGamePrice = videoGame.price * 0.8;
+          break;
+        default:
+          break;
+      }
+
       return (
-        videoGame.price * preOrderQuantity * numberOfRentalDays + returnFine
+        videoGamePrice * preOrderQuantity * numberOfRentalDays + returnFine
       );
     });
 
@@ -74,12 +103,19 @@ export class ReturnService {
     );
     returnTicket.estimatedPrice = totalPrice;
 
-    if (returnTicket.estimatedPrice === rental.estimatedPrice) {
-      this.rentalService.updateRental(rentalId, {
+    const { returnValue } = rental;
+    const updateReturnValue = returnValue + totalPrice;
+    await this.rentalService.updateRental(rentalId, {
+      returnValue: updateReturnValue,
+    });
+    console.log(rental.returnValue);
+
+    if (updateReturnValue >= rental.estimatedPrice) {
+      await this.rentalService.updateRental(rentalId, {
         returnState: ReturnStateEnum.RETURNED,
       });
-    } else if (returnTicket.estimatedPrice > 0) {
-      this.rentalService.updateRental(rentalId, {
+    } else {
+      await this.rentalService.updateRental(rentalId, {
         returnState: ReturnStateEnum.NOT_ENOUGH,
       });
     }
@@ -137,11 +173,9 @@ export class ReturnService {
     id: string,
     updateReturnDto: UpdateReturnDto,
   ): Promise<Return> {
-    const updated = await this.returnlModel.findByIdAndUpdate(
-      id,
-      updateReturnDto,
-      { new: true },
-    );
+    const updated = await this.returnlModel
+      .findByIdAndUpdate(id, updateReturnDto, { new: true })
+      .exec();
 
     if (!updated) {
       throw new NotFoundException(`Return ticket with ${id} not found`);
