@@ -33,9 +33,14 @@ export class InvoiceService {
     return await invoice.save();
   }
 
-  findAll() {
-    return `This action returns all invoice`;
+  async getInvoice(): Promise<Invoice[]> {
+    const result = await this.invoiceModel.find().exec();
+    if (!result) {
+      throw new NotFoundException(`Could not find invoice `);
+    }
+    return result;
   }
+  
 
   async getInvoiceByID(id: string): Promise<Invoice> {
     const result = await this.invoiceModel.findById(id).exec();
@@ -45,11 +50,26 @@ export class InvoiceService {
     return result;
   }
 
-  update(id: number, updateInvoiceDto: UpdateInvoiceDto) {
-    return `This action updates a #${id} invoice`;
+  async updateInvoice(
+    id: string,
+    updateInvoiceDto: UpdateInvoiceDto,
+  ): Promise<Invoice> {
+    const updated = await this.invoiceModel.findByIdAndUpdate(
+      id,
+      updateInvoiceDto,
+      { new: true },
+    );
+    if (!updated) {
+      throw new NotFoundException('Invoice not found');
+    }
+    return updated;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} invoice`;
+  async deleteInvoice(id: string): Promise<void> {
+    const result = await this.getInvoiceByID(id);
+    if (!result) {
+      throw new NotFoundException(`Could not find invoice with ${id}`);
+    }
+    await this.invoiceModel.deleteOne({ _id: id }).exec();
   }
 }
