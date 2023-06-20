@@ -16,5 +16,6 @@ import { CustomerModule } from 'src/customer/customer.module';
   ],
   controllers: [ReturnController],
   providers: [ReturnService],
+  exports: [ReturnService],
 })
 export class ReturnModule {}
