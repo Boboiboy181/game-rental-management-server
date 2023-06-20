@@ -109,7 +109,7 @@ export class InvoiceService {
   }
 
   //  async redeemVoucher(redeemvoucherdto:RedeemVoucherDto): Promise<void> {
-  //    const{code,customerId,voucherId}=redeemvoucherdto;
+  //    const{code,customerId}=redeemvoucherdto;
   //    const result = await this.voucherModel.findOne({
   //    voucherCode:code,
   //    }).exec();

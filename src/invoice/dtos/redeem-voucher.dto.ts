@@ -13,8 +13,4 @@ export class RedeemVoucherDto {
   @IsString()
   customerId: string;
 
-  @ApiProperty()
-  @IsNotEmpty()
-  @IsString()
-  voucherId: string;
 }
