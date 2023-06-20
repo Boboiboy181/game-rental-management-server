@@ -12,6 +12,7 @@ import { RentalDaysEnum } from './enums/rental-days.enum';
 import { FilterPreOrderDto } from './dtos/filter-pre-order.dto';
 import { CustomerService } from 'src/customer/customer.service';
 import { VideoGameService } from 'src/video-game/video-game.service';
+import { MailerService } from '@nestjs-modules/mailer';
 
 @Injectable()
 export class PreOrderService {
@@ -19,6 +20,7 @@ export class PreOrderService {
     @InjectModel('PreOrder') private readonly preOrderModel: Model<PreOrder>,
     private readonly customerService: CustomerService,
     private readonly videoGameService: VideoGameService,
+    private readonly mailerService: MailerService,
   ) {}
 
   async createPreOrder(
@@ -97,6 +99,48 @@ export class PreOrderService {
       0,
     );
     preOrder.estimatedPrice = totalPrice;
+
+    const formatDate = (dateString: string) => {
+      const date = new Date(dateString);
+      const options: Intl.DateTimeFormatOptions = {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+      };
+      return new Intl.DateTimeFormat('vi-VN', options).format(date);
+    };
+
+    // send email
+    await this.mailerService.sendMail({
+      to: email,
+      subject: 'Pre-order confirmation',
+      template: './pre-order-confirmation',
+      context: {
+        customerName,
+        email,
+        phoneNumber,
+        rentedGames: preOrder.rentedGames.map((game) => {
+          return {
+            name: game.game.productName,
+            quantity: game.preOrderQuantity,
+            price: game.game.price,
+            rentalDays: game.numberOfRentalDays,
+            returnDate: formatDate(game.returnDate.toString()),
+          };
+        }),
+        priceWithRentDays: preOrder.rentedGames.map((game) => {
+          return {
+            name: game.game.productName,
+            quantity: game.preOrderQuantity,
+            price: game.game.price,
+            rentalDays: game.numberOfRentalDays,
+            returnDate: formatDate(game.returnDate.toString()),
+          };
+        }),
+        totalPrice: preOrder.estimatedPrice,
+      },
+    });
+
     return await preOrder.save();
   }
 
