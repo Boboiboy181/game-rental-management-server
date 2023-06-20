@@ -13,6 +13,7 @@ import { ReturnModule } from './return/return.module';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { join } from 'path';
+import { InvoiceModule } from './invoice/invoice.module';
 
 @Module({
   imports: [
@@ -59,6 +60,7 @@ import { join } from 'path';
     RentalPackageModule,
     RentalModule,
     ReturnModule,
+    InvoiceModule,
   ],
 })
 export class AppModule {}
