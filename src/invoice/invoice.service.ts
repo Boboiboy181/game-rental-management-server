@@ -115,7 +115,7 @@ export class InvoiceService {
   //    }).exec();
   //    if (!result):
   //     throw new NotFoundException(`Wrong voucher code`);
-  //    await this.addPoint(customerId.toString(),result.redeemedPoint)
+  //    await this.subtractPoint(customerId.toString(),result.redeemedPoint)
 
   //  }
 }
