@@ -25,13 +25,12 @@ export class InvoiceService {
     const invoice = new this.invoiceModel({
       customer: returnTicket.customer,
       rentedGames: returnTicket.rentedGames,
-      fine: returnTicket.fine,
       finalPrice: returnTicket.estimatedPrice,
     });
     await this.returnService.updateReturnTicket(returnTicketID, {
       paymentState: PaymentStateEnum.PAID,
     });
-    await this.addPoint(returnTicket.customer.toString(),returnTicket.estimatedPrice)
+    // await this.addPoint(returnTicket.customer.toString(),returnTicket.estimatedPrice)
     return await invoice.save();
   }
 
@@ -42,7 +41,6 @@ export class InvoiceService {
     }
     return result;
   }
-  
 
   async getInvoiceByID(id: string): Promise<Invoice> {
     const result = await this.invoiceModel.findById(id).exec();
@@ -100,7 +98,7 @@ export class InvoiceService {
     if (!customer) {
       throw new Error('Customer with id ${id} not found');
     }
-    voucherpoint=2; // GIả sử voucher point =2
+    voucherpoint = 2; // GIả sử voucher point =2
     if (customer.point < voucherpoint) {
       throw new Error(`Insufficient points for voucher redemption`);
     }
