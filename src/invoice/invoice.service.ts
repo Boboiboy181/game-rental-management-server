@@ -7,6 +7,7 @@ import { Invoice } from './schemas/invoice.schema';
 import { ReturnService } from 'src/return/return.service';
 import { PaymentStateEnum } from 'src/return/enum/payment-state.enum';
 import { Customer } from 'src/customer/schemas/customer.schema';
+import { RedeemVoucherDto } from './dtos/redeem-voucher.dto';
 
 @Injectable()
 export class InvoiceService {
@@ -89,4 +90,32 @@ export class InvoiceService {
     customer.point += pointsEarned;
     await customer.save();
   }
+
+  async subtractPoint(customerId: string, voucherpoint: number): Promise<void> {
+    // Logic trừ điểm theo voucher hiện tại
+
+    // Logic trừ điểm tích lũy
+    const customer = await this.customerModel.findById(customerId);
+
+    if (!customer) {
+      throw new Error('Customer with id ${id} not found');
+    }
+    voucherpoint=2; // GIả sử voucher point =2
+    if (customer.point < voucherpoint) {
+      throw new Error(`Insufficient points for voucher redemption`);
+    }
+    customer.point -= voucherpoint;
+    await customer.save();
+  }
+
+  //  async redeemVoucher(redeemvoucherdto:RedeemVoucherDto): Promise<void> {
+  //    const{code,customerId,voucherId}=redeemvoucherdto;
+  //    const result = await this.voucherModel.findOne({
+  //    voucherCode:code,
+  //    }).exec();
+  //    if (!result):
+  //     throw new NotFoundException(`Wrong voucher code`);
+  //    await this.addPoint(customerId.toString(),result.redeemedPoint)
+
+  //  }
 }
