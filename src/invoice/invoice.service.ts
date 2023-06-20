@@ -25,7 +25,6 @@ export class InvoiceService {
     const invoice = new this.invoiceModel({
       customer: returnTicket.customer,
       rentedGames: returnTicket.rentedGames,
-      // fine: returnTicket.fine,
       finalPrice: returnTicket.estimatedPrice,
     });
     await this.returnService.updateReturnTicket(returnTicketID, {
