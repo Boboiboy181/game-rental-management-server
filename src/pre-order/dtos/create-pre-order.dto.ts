@@ -1,4 +1,5 @@
 import {
+  IsEmail,
   IsNotEmpty,
   IsNumberString,
   IsOptional,
@@ -13,6 +14,11 @@ export class CreatePreOrderDto {
   @IsOptional()
   @IsString()
   customerID?: string;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsEmail()
+  email: string;
 
   @ApiProperty()
   @IsNotEmpty()

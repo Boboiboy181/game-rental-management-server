@@ -24,11 +24,12 @@ export class PreOrderService {
   async createPreOrder(
     createPreOrderDto: CreatePreOrderDto,
   ): Promise<PreOrder> {
-    const { customerID, phoneNumber, customerName, rentedGames } =
+    const { customerID, email, phoneNumber, customerName, rentedGames } =
       createPreOrderDto;
 
     // find customer
     const customer = await this.customerService.getCustomerById(customerID, {
+      email,
       customerName,
       phoneNumber,
     });
