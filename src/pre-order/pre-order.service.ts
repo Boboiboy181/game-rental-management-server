@@ -128,15 +128,6 @@ export class PreOrderService {
             returnDate: formatDate(game.returnDate.toString()),
           };
         }),
-        priceWithRentDays: preOrder.rentedGames.map((game) => {
-          return {
-            name: game.game.productName,
-            quantity: game.preOrderQuantity,
-            price: game.game.price,
-            rentalDays: game.numberOfRentalDays,
-            returnDate: formatDate(game.returnDate.toString()),
-          };
-        }),
         totalPrice: preOrder.estimatedPrice,
       },
     });
