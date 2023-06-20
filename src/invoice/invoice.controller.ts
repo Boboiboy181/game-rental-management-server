@@ -6,6 +6,7 @@ import {
   Patch,
   Param,
   Delete,
+  BadRequestException,
 } from '@nestjs/common';
 import { InvoiceService } from './invoice.service';
 import { CreateInvoiceDto } from './dtos/create-invoice.dto';
@@ -55,4 +56,19 @@ export class InvoiceController {
   async deleteInvoice(@Param('id') id: string): Promise<void> {
     await this.invoiceService.deleteInvoice(id);
   }
+  @Post('/redeem-voucher')
+
+  async redeemVoucher(
+  @Body('customerId') customerId: string,
+  @Body('voucherPoints') voucherId: string,
+): Promise<void> {
+  try {
+    await this.invoiceService.subtractPoint(customerId, voucherId);
+    // Logic xử lý thêm sau khi trừ điểm thành công
+    return;
+  } catch (error) {
+    // Xử lý lỗi nếu có
+    throw new BadRequestException(error.message);
+  }
+}
 }
