@@ -2,6 +2,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Schema as MongooseSchema } from 'mongoose';
 import { Customer } from 'src/customer/schemas/customer.schema';
 import { VideoGame } from 'src/video-game/schemas/video-game.schema';
+import { Voucher } from './voucher.schema';
 
 export type InvoiceDocument = HydratedDocument<Invoice>;
 
@@ -17,6 +18,9 @@ export class Invoice {
     },
   ])
   rentedGames: [{ game: VideoGame; quantity: number }];
+
+  @Prop([{ type: MongooseSchema.Types.ObjectId, ref: 'Voucher' }])
+  voucher: Voucher[];
 
   @Prop()
   fine: number;

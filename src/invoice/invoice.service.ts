@@ -6,31 +6,51 @@ import { Model } from 'mongoose';
 import { Invoice } from './schemas/invoice.schema';
 import { ReturnService } from 'src/return/return.service';
 import { PaymentStateEnum } from 'src/return/enum/payment-state.enum';
-import { Customer } from 'src/customer/schemas/customer.schema';
-import { RedeemVoucherDto } from './dtos/redeem-voucher.dto';
+import { CustomerService } from '../customer/customer.service';
+import { Voucher } from './schemas/voucher.schema';
 
 @Injectable()
 export class InvoiceService {
   constructor(
     @InjectModel('Invoice') private readonly invoiceModel: Model<Invoice>,
-    @InjectModel('Customer') private readonly customerModel: Model<Customer>,
+    @InjectModel('Voucher') private readonly voucherModel: Model<Voucher>,
+    private readonly customerService: CustomerService,
     private readonly returnService: ReturnService,
   ) {}
 
   async createInvoice(createInvoiceDto: CreateInvoiceDto): Promise<Invoice> {
-    const { returnTicketID } = createInvoiceDto;
+    const { returnTicketID, voucherCodes } = createInvoiceDto;
     const returnTicket = await this.returnService.getReturnTicketById(
       returnTicketID,
     );
     const invoice = new this.invoiceModel({
       customer: returnTicket.customer,
       rentedGames: returnTicket.rentedGames,
-      finalPrice: returnTicket.estimatedPrice,
     });
     await this.returnService.updateReturnTicket(returnTicketID, {
       paymentState: PaymentStateEnum.PAID,
     });
-    // await this.addPoint(returnTicket.customer.toString(),returnTicket.estimatedPrice)
+    const totalVoucherValue = await voucherCodes.reduce(
+      async (acc: Promise<number>, voucherCode: string) => {
+        const voucher = await this.getVoucherByCode(voucherCode);
+        invoice.voucher.push(voucher);
+        const voucherValue = voucher.voucherValue;
+        const previousValue = await acc;
+        return previousValue + voucherValue;
+      },
+      Promise.resolve(0),
+    );
+    // subtract point from customer
+    await this.subtractPoint(returnTicket.customer.toString(), voucherCodes);
+    // price with voucher
+    invoice.finalPrice =
+      returnTicket.estimatedPrice * (totalVoucherValue * 0.01);
+
+    // adding point to customer
+    await this.addPoint(
+      returnTicket.customer.toString(),
+      returnTicket.estimatedPrice,
+    );
     return await invoice.save();
   }
 
@@ -76,34 +96,42 @@ export class InvoiceService {
   async addPoint(customerId: string, transactionAmount: number): Promise<void> {
     // Logic tính tiền giao dịch hóa đơn hiện tại
 
-    // Logic cộng điểm tích lũy
-    const customer = await this.customerModel.findById(customerId);
-
+    const customer = await this.customerService.getCustomerById(customerId);
     if (!customer) {
       throw new Error('Customer with id ${id} not found');
     }
-
+    // Logic cộng điểm tích lũy
     const pointsEarned = Math.floor(transactionAmount / 10000); // Ví dụ: Mỗi 10,000 VNĐ giao dịch tích 1 điểm
 
-    customer.point += pointsEarned;
-    await customer.save();
+    await this.customerService.updateCustomer(customerId, {
+      point: customer.point + pointsEarned,
+    });
   }
 
-  async subtractPoint(customerId: string, voucherpoint: number): Promise<void> {
-    // Logic trừ điểm theo voucher hiện tại
-
-    // Logic trừ điểm tích lũy
-    const customer = await this.customerModel.findById(customerId);
-
+  async subtractPoint(
+    customerId: string,
+    voucherCodes: string[],
+  ): Promise<void> {
+    const customer = await this.customerService.getCustomerById(customerId);
     if (!customer) {
       throw new Error('Customer with id ${id} not found');
     }
-    voucherpoint = 2; // GIả sử voucher point =2
-    if (customer.point < voucherpoint) {
+    const totalVoucherPoint = await voucherCodes.reduce(
+      async (acc: Promise<number>, voucherCode: string) => {
+        const voucher = await this.getVoucherByCode(voucherCode);
+        const voucherPoint = voucher.pointRequired;
+        const previousValue = await acc;
+        return previousValue + voucherPoint;
+      },
+      Promise.resolve(0),
+    );
+    // Logic trừ điểm tích lũy
+    if (customer.point < totalVoucherPoint) {
       throw new Error(`Insufficient points for voucher redemption`);
     }
-    customer.point -= voucherpoint;
-    await customer.save();
+    await this.customerService.updateCustomer(customerId, {
+      point: customer.point - totalVoucherPoint,
+    });
   }
 
   //  async redeemVoucher(redeemvoucherdto:RedeemVoucherDto): Promise<void> {
@@ -116,4 +144,14 @@ export class InvoiceService {
   //    await this.subtractPoint(customerId.toString(),result.redeemedPoint)
 
   //  }
+
+  async getVoucherByCode(code: string): Promise<Voucher> {
+    const result = await this.voucherModel
+      .findOne({ voucherCode: code })
+      .exec();
+    if (result) {
+      throw new NotFoundException(`Could not find voucher with ${code}`);
+    }
+    return result;
+  }
 }

@@ -6,10 +6,17 @@ import { InvoiceSchema } from './schemas/invoice.schema';
 import { VideoGameModule } from 'src/video-game/video-game.module';
 import { CustomerModule } from 'src/customer/customer.module';
 import { ReturnModule } from 'src/return/return.module';
+import { VoucherSchema } from './schemas/voucher.schema';
 
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: 'Invoice', schema: InvoiceSchema }]),
+    MongooseModule.forFeature([
+      {
+        name: 'Voucher',
+        schema: VoucherSchema,
+      },
+    ]),
     VideoGameModule,
     CustomerModule,
     ReturnModule,
