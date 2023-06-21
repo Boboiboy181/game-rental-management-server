@@ -8,6 +8,7 @@ import { ReturnService } from 'src/return/return.service';
 import { PaymentStateEnum } from 'src/return/enum/payment-state.enum';
 import { CustomerService } from '../customer/customer.service';
 import { Voucher } from './schemas/voucher.schema';
+import { UpdateVoucherDto } from './dtos/update-voucher.dto';
 
 @Injectable()
 export class InvoiceService {
@@ -67,10 +68,25 @@ export class InvoiceService {
     return result;
   }
 
+  async updateVoucher(
+    id: string,
+    updateVoucherDto: UpdateVoucherDto,
+  ): Promise<Voucher> {
+    const updated = await this.voucherModel.findByIdAndUpdate(
+      id,
+      updateVoucherDto,
+      { new: true },
+    );
+    if (!updated) {
+      throw new NotFoundException('Voucher not found');
+    }
+    return updated;
+  }
+
   async deleteVoucher(id: string): Promise<void> {
     const result = await this.voucherModel.findById(id).exec();
     if (!result) {
-      throw new NotFoundException(`Could not find invoice with ${id}`);
+      throw new NotFoundException(`Could not find voucher with ${id}`);
     }
     await this.invoiceModel.deleteOne({ _id: id }).exec();
   }
