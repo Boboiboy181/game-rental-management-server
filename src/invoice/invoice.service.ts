@@ -9,6 +9,7 @@ import { PaymentStateEnum } from 'src/return/enum/payment-state.enum';
 import { CustomerService } from '../customer/customer.service';
 import { Voucher } from './schemas/voucher.schema';
 import { UpdateVoucherDto } from './dtos/update-voucher.dto';
+import { createInvoiceDtoVoucherDto } from './dtos/create-voucher.dto';
 
 @Injectable()
 export class InvoiceService {
@@ -66,6 +67,18 @@ export class InvoiceService {
       throw new NotFoundException(`Could not find voucher with ${code}`);
     }
     return result;
+  }
+
+  async createVoucher(
+    createVoucherDto: createInvoiceDtoVoucherDto,
+  ): Promise<Voucher> {
+    const { voucherCode } = createVoucherDto;
+    const voucher = await this.getVoucherByCode(voucherCode);
+    if (voucher) {
+      throw new Error(`Voucher with code ${voucherCode} already exists`);
+    }
+    const createdVoucher = new this.voucherModel(createVoucherDto);
+    return await createdVoucher.save();
   }
 
   async updateVoucher(

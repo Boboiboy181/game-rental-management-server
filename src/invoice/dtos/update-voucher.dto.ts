@@ -15,5 +15,5 @@ export class UpdateVoucherDto {
   @ApiPropertyOptional({ description: 'Voucher point' })
   @IsOptional()
   @IsNumber()
-  voucherPoint?: number;
+  vpointRequired?: number;
 }
