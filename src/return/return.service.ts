@@ -108,7 +108,6 @@ export class ReturnService {
     await this.rentalService.updateRental(rentalId, {
       returnValue: updateReturnValue,
     });
-    console.log(rental.returnValue);
 
     if (updateReturnValue >= rental.estimatedPrice) {
       await this.rentalService.updateRental(rentalId, {

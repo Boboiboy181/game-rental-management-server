@@ -18,6 +18,55 @@ export class InvoiceService {
     private readonly returnService: ReturnService,
   ) {}
 
+  async addPoint(customerId: string, transactionAmount: number): Promise<void> {
+    const customer = await this.customerService.getCustomerById(customerId);
+    if (!customer) {
+      throw new Error('Customer with id ${id} not found');
+    }
+    // Logic cộng điểm tích lũy
+    const pointsEarned = Math.floor(transactionAmount / 10000); // Ví dụ: Mỗi 10,000 VNĐ giao dịch tích 1 điểm
+
+    await this.customerService.updateCustomer(customerId, {
+      point: customer.point + pointsEarned,
+    });
+  }
+
+  async subtractPoint(
+    customerId: string,
+    voucherCodes: string[],
+  ): Promise<void> {
+    const customer = await this.customerService.getCustomerById(customerId);
+    if (!customer) {
+      throw new Error('Customer with id ${id} not found');
+    }
+    const totalVoucherPoint = await voucherCodes.reduce(
+      async (acc: Promise<number>, voucherCode: string) => {
+        const voucher = await this.getVoucherByCode(voucherCode);
+        const voucherPoint = voucher.pointRequired;
+        const previousValue = await acc;
+        return previousValue + voucherPoint;
+      },
+      Promise.resolve(0),
+    );
+    // Logic trừ điểm tích lũy
+    if (customer.point < totalVoucherPoint) {
+      throw new Error(`Insufficient points for voucher redemption`);
+    }
+    await this.customerService.updateCustomer(customerId, {
+      point: customer.point - totalVoucherPoint,
+    });
+  }
+
+  async getVoucherByCode(code: string): Promise<Voucher> {
+    const result = await this.voucherModel
+      .findOne({ voucherCode: code })
+      .exec();
+    if (!result) {
+      throw new NotFoundException(`Could not find voucher with ${code}`);
+    }
+    return result;
+  }
+
   async createInvoice(createInvoiceDto: CreateInvoiceDto): Promise<Invoice> {
     const { returnTicketID, voucherCodes } = createInvoiceDto;
     const returnTicket = await this.returnService.getReturnTicketById(
@@ -26,25 +75,31 @@ export class InvoiceService {
     const invoice = new this.invoiceModel({
       customer: returnTicket.customer,
       rentedGames: returnTicket.rentedGames,
+      return: returnTicket,
     });
     await this.returnService.updateReturnTicket(returnTicketID, {
       paymentState: PaymentStateEnum.PAID,
     });
-    const totalVoucherValue = await voucherCodes.reduce(
-      async (acc: Promise<number>, voucherCode: string) => {
-        const voucher = await this.getVoucherByCode(voucherCode);
-        invoice.voucher.push(voucher);
-        const voucherValue = voucher.voucherValue;
-        const previousValue = await acc;
-        return previousValue + voucherValue;
-      },
-      Promise.resolve(0),
-    );
-    // subtract point from customer
-    await this.subtractPoint(returnTicket.customer.toString(), voucherCodes);
-    // price with voucher
-    invoice.finalPrice =
-      returnTicket.estimatedPrice * (totalVoucherValue * 0.01);
+
+    if (voucherCodes) {
+      const totalVoucherValue = await voucherCodes.reduce(
+        async (acc: Promise<number>, voucherCode: string) => {
+          const voucher = await this.getVoucherByCode(voucherCode);
+          invoice.voucher.push(voucher);
+          const voucherValue = voucher.voucherValue;
+          const previousValue = await acc;
+          return previousValue + voucherValue;
+        },
+        Promise.resolve(0),
+      );
+      // subtract point from customer
+      await this.subtractPoint(returnTicket.customer.toString(), voucherCodes);
+      // price with voucher
+      invoice.finalPrice =
+        returnTicket.estimatedPrice * (1 - totalVoucherValue * 0.01);
+    } else {
+      invoice.finalPrice = returnTicket.estimatedPrice;
+    }
 
     // adding point to customer
     await this.addPoint(
@@ -91,67 +146,5 @@ export class InvoiceService {
       throw new NotFoundException(`Could not find invoice with ${id}`);
     }
     await this.invoiceModel.deleteOne({ _id: id }).exec();
-  }
-
-  async addPoint(customerId: string, transactionAmount: number): Promise<void> {
-    // Logic tính tiền giao dịch hóa đơn hiện tại
-
-    const customer = await this.customerService.getCustomerById(customerId);
-    if (!customer) {
-      throw new Error('Customer with id ${id} not found');
-    }
-    // Logic cộng điểm tích lũy
-    const pointsEarned = Math.floor(transactionAmount / 10000); // Ví dụ: Mỗi 10,000 VNĐ giao dịch tích 1 điểm
-
-    await this.customerService.updateCustomer(customerId, {
-      point: customer.point + pointsEarned,
-    });
-  }
-
-  async subtractPoint(
-    customerId: string,
-    voucherCodes: string[],
-  ): Promise<void> {
-    const customer = await this.customerService.getCustomerById(customerId);
-    if (!customer) {
-      throw new Error('Customer with id ${id} not found');
-    }
-    const totalVoucherPoint = await voucherCodes.reduce(
-      async (acc: Promise<number>, voucherCode: string) => {
-        const voucher = await this.getVoucherByCode(voucherCode);
-        const voucherPoint = voucher.pointRequired;
-        const previousValue = await acc;
-        return previousValue + voucherPoint;
-      },
-      Promise.resolve(0),
-    );
-    // Logic trừ điểm tích lũy
-    if (customer.point < totalVoucherPoint) {
-      throw new Error(`Insufficient points for voucher redemption`);
-    }
-    await this.customerService.updateCustomer(customerId, {
-      point: customer.point - totalVoucherPoint,
-    });
-  }
-
-  //  async redeemVoucher(redeemvoucherdto:RedeemVoucherDto): Promise<void> {
-  //    const{code,customerId}=redeemvoucherdto;
-  //    const result = await this.voucherModel.findOne({
-  //    voucherCode:code,
-  //    }).exec();
-  //    if (!result):
-  //     throw new NotFoundException(`Wrong voucher code`);
-  //    await this.subtractPoint(customerId.toString(),result.redeemedPoint)
-
-  //  }
-
-  async getVoucherByCode(code: string): Promise<Voucher> {
-    const result = await this.voucherModel
-      .findOne({ voucherCode: code })
-      .exec();
-    if (result) {
-      throw new NotFoundException(`Could not find voucher with ${code}`);
-    }
-    return result;
   }
 }

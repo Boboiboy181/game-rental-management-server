@@ -9,5 +9,5 @@ export class CreateInvoiceDto {
 
   @ApiPropertyOptional()
   @IsOptional()
-  voucherCodes: string[];
+  voucherCodes?: string[];
 }
