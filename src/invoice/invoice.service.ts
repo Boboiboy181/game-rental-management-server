@@ -67,6 +67,14 @@ export class InvoiceService {
     return result;
   }
 
+  async deleteVoucher(id: string): Promise<void> {
+    const result = await this.voucherModel.findById(id).exec();
+    if (!result) {
+      throw new NotFoundException(`Could not find invoice with ${id}`);
+    }
+    await this.invoiceModel.deleteOne({ _id: id }).exec();
+  }
+
   async createInvoice(createInvoiceDto: CreateInvoiceDto): Promise<Invoice> {
     const { returnTicketID, voucherCodes } = createInvoiceDto;
     const returnTicket = await this.returnService.getReturnTicketById(
