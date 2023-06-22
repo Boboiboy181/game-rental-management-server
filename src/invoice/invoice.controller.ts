@@ -6,7 +6,6 @@ import {
   Patch,
   Param,
   Delete,
-  BadRequestException,
 } from '@nestjs/common';
 import { InvoiceService } from './invoice.service';
 import { CreateInvoiceDto } from './dtos/create-invoice.dto';
@@ -26,25 +25,25 @@ export class InvoiceController {
 
   @Post()
   @ApiCreatedResponse({ type: Invoice })
-  createInvoice(@Body() createInvoiceDto: CreateInvoiceDto) {
+  createInvoice(@Body() createInvoiceDto: CreateInvoiceDto): Promise<Invoice> {
     return this.invoiceService.createInvoice(createInvoiceDto);
   }
 
   @Get()
   @ApiOkResponse({ type: [Invoice] })
-  getInvoice() {
+  getInvoice(): Promise<Invoice[]> {
     return this.invoiceService.getInvoice();
   }
 
   @Get(':id')
   @ApiOkResponse({ type: Invoice })
-  getInvoiceByID(@Param('id') id: string) {
+  getInvoiceByID(@Param('id') id: string): Promise<Invoice> {
     return this.invoiceService.getInvoiceByID(id);
   }
 
   @Patch(':id')
   @ApiOkResponse({ type: Invoice })
-  update(
+  updateInvoice(
     @Param('id') id: string,
     @Body() updateInvoiceDto: UpdateInvoiceDto,
   ): Promise<Invoice> {
@@ -53,21 +52,7 @@ export class InvoiceController {
 
   @Delete(':id')
   @ApiResponse({ status: 204, description: 'Delete success' })
-  async deleteInvoice(@Param('id') id: string): Promise<void> {
-    await this.invoiceService.deleteInvoice(id);
+  deleteInvoice(@Param('id') id: string): Promise<void> {
+    return this.invoiceService.deleteInvoice(id);
   }
-  // @Post('/redeem-voucher')
-  // async redeemVoucher(
-  //   @Body('customerId') customerId: string,
-  //   @Body('voucherPoints') voucherId: string,
-  // ): Promise<void> {
-  //   try {
-  //     await this.invoiceService.subtractPoint(customerId, voucherId);
-  //     // Logic xử lý thêm sau khi trừ điểm thành công
-  //     return;
-  //   } catch (error) {
-  //     // Xử lý lỗi nếu có
-  //     throw new BadRequestException(error.message);
-  //   }
-  // }
 }
