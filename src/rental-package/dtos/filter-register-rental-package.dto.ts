@@ -1,10 +1,10 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import {
-  IsString,
   IsNumberString,
+  IsOptional,
+  IsString,
   MaxLength,
   MinLength,
-  IsOptional,
 } from 'class-validator';
 
 export class FilterRegisterRentalPackageListDto {
@@ -23,5 +23,5 @@ export class FilterRegisterRentalPackageListDto {
   @MaxLength(10)
   @MinLength(10)
   @IsOptional()
-  phoneNumber?: number;
+  phoneNumber?: string;
 }

@@ -10,6 +10,7 @@ import { CustomerService } from '../customer/customer.service';
 import { Voucher } from './schemas/voucher.schema';
 import { UpdateVoucherDto } from './dtos/update-voucher.dto';
 import { createInvoiceDtoVoucherDto } from './dtos/create-voucher.dto';
+import { RentalPackageService } from '../rental-package/rental-package.service';
 
 @Injectable()
 export class InvoiceService {
@@ -18,6 +19,7 @@ export class InvoiceService {
     @InjectModel('Voucher') private readonly voucherModel: Model<Voucher>,
     private readonly customerService: CustomerService,
     private readonly returnService: ReturnService,
+    private readonly rentalPackageService: RentalPackageService,
   ) {}
 
   async addPoint(customerId: string, transactionAmount: number): Promise<void> {
@@ -104,6 +106,39 @@ export class InvoiceService {
     await this.invoiceModel.deleteOne({ _id: id }).exec();
   }
 
+  async checkRegisterRentalPackage(
+    customerID: string,
+    rentedGames,
+    createInvoceAt: Date,
+  ): Promise<boolean> {
+    const result = await this.rentalPackageService.getRegistrationByCustomerID(
+      customerID,
+    );
+    if (result.length === 0) return false;
+
+    const latestRegisterRentalPackage = result[0];
+
+    // Check if the registration is still valid
+    const isDateValid =
+      latestRegisterRentalPackage.registrationEndDate >= createInvoceAt;
+    const numberOfRentedGames = rentedGames.reduce((acc, game) => {
+      return acc + game.preOrderQuantity;
+    }, 0);
+
+    // Check if the number of games is still valid
+    const remainingGame =
+      latestRegisterRentalPackage.numberOfGameRemaining - numberOfRentedGames;
+    const isQuantityValid = remainingGame > 0;
+    await this.rentalPackageService.updateRegistration(
+      latestRegisterRentalPackage,
+      {
+        numberOfGameRemaining: remainingGame,
+      },
+    );
+
+    return isDateValid && isQuantityValid;
+  }
+
   async createInvoice(createInvoiceDto: CreateInvoiceDto): Promise<Invoice> {
     const { returnTicketID, voucherCodes } = createInvoiceDto;
     const returnTicket = await this.returnService.getReturnTicketById(
@@ -134,6 +169,14 @@ export class InvoiceService {
       // price with voucher
       invoice.finalPrice =
         returnTicket.estimatedPrice * (1 - totalVoucherValue * 0.01);
+    } else if (
+      await this.checkRegisterRentalPackage(
+        returnTicket.customer.toString(),
+        returnTicket.rentedGames,
+        new Date(),
+      )
+    ) {
+      invoice.finalPrice = 0;
     } else {
       invoice.finalPrice = returnTicket.estimatedPrice;
     }

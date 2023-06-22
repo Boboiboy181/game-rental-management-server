@@ -7,6 +7,7 @@ import { VideoGameModule } from 'src/video-game/video-game.module';
 import { CustomerModule } from 'src/customer/customer.module';
 import { ReturnModule } from 'src/return/return.module';
 import { VoucherSchema } from './schemas/voucher.schema';
+import { RentalPackageModule } from '../rental-package/rental-package.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { VoucherSchema } from './schemas/voucher.schema';
     VideoGameModule,
     CustomerModule,
     ReturnModule,
+    RentalPackageModule,
   ],
   controllers: [InvoiceController],
   providers: [InvoiceService],
