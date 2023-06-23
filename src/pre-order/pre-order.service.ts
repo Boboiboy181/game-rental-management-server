@@ -9,7 +9,6 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { PreOrder } from './schemas/pre-order.schema';
 import { RentalDaysEnum } from './enums/rental-days.enum';
-import { FilterPreOrderDto } from './dtos/filter-pre-order.dto';
 import { CustomerService } from 'src/customer/customer.service';
 import { VideoGameService } from 'src/video-game/video-game.service';
 import { MailerService } from '@nestjs-modules/mailer';
@@ -135,14 +134,9 @@ export class PreOrderService {
     return await preOrder.save();
   }
 
-  async getPreOrder(filterPreOrderDto: FilterPreOrderDto): Promise<PreOrder[]> {
-    const { name } = filterPreOrderDto;
-
+  async getPreOrder(): Promise<PreOrder[]> {
     const query = this.preOrderModel.find();
     query.setOptions({ lean: true });
-    if (name) {
-      query.where({ name: { $regex: name, $options: 'i' } });
-    }
     return await query.exec();
   }
 
