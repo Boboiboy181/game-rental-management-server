@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Schema as MongooseSchema, HydratedDocument } from 'mongoose';
+import { HydratedDocument, Schema as MongooseSchema } from 'mongoose';
 import { RentalPackage } from './rental-package.schema';
 import { Customer } from 'src/customer/schemas/customer.schema';
 
@@ -25,6 +25,9 @@ export class RentalPackageRegistration {
     },
   })
   registrationEndDate: Date;
+
+  @Prop()
+  numberOfGameRemaining: number;
 }
 
 export const RentalPackageRegistrationSchema = SchemaFactory.createForClass(

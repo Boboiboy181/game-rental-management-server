@@ -19,5 +19,6 @@ import { CustomerModule } from 'src/customer/customer.module';
   ],
   controllers: [RentalPackageController],
   providers: [RentalPackageService],
+  exports: [RentalPackageService],
 })
 export class RentalPackageModule {}

@@ -7,8 +7,12 @@ import { RentalPackage } from './schemas/rental-package.schema';
 import { FilterRentalPackageDto } from './dtos/filter-rental-package.dto';
 import { FilterRegisterRentalPackageListDto } from './dtos/filter-register-rental-package.dto';
 import { RegisterRentalPackageDto } from './dtos/register-rental-package.dto';
-import { RentalPackageRegistration } from './schemas/rental-package-registration.schema';
+import {
+  RentalPackageRegistration,
+  RentalPackageRegistrationDocument,
+} from './schemas/rental-package-registration.schema';
 import { Customer } from 'src/customer/schemas/customer.schema';
+import { UpdateRegisterRentalPackageDto } from './dtos/update-register-rental-package.dto';
 
 @Injectable()
 export class RentalPackageService {
@@ -90,7 +94,29 @@ export class RentalPackageService {
       rentalPackage,
       customer,
     });
+    rentalPackageRegistration.numberOfGameRemaining =
+      rentalPackage.numberOfGames;
+
     return await rentalPackageRegistration.save();
+  }
+
+  async getRegistrationByCustomerID(
+    customerID: string,
+  ): Promise<RentalPackageRegistrationDocument[]> {
+    const query = this.rentalPackageRegistrationModel.find();
+    query.where('customer').equals(customerID);
+    query.sort({ registrationDate: -1 });
+    query.limit(1);
+    return await query.exec();
+  }
+
+  async updateRegistration(
+    register: RentalPackageRegistrationDocument,
+    updateRegisterRentalPackage: UpdateRegisterRentalPackageDto,
+  ): Promise<RentalPackageRegistration> {
+    const { numberOfGameRemaining } = updateRegisterRentalPackage;
+    register.numberOfGameRemaining = numberOfGameRemaining;
+    return await register.save();
   }
 
   async getRegisterRentalPackage(
