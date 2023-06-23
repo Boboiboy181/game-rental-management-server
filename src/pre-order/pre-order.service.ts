@@ -62,15 +62,9 @@ export class PreOrderService {
     return await preOrder.save();
   }
 
-  async getPreOrder(filterPreOrderDto: FilterPreOrderDto): Promise<PreOrder[]> {
-    const { name } = filterPreOrderDto;
-
-    const query = this.preOrderModel.find();
-    query.setOptions({ lean: true });
-    if (name) {
-      query.where({ name: { $regex: name, $options: 'i' } });
-    }
-    return await query.exec();
+  async getPreOrder(): Promise<PreOrder[]> {
+    const query = this.preOrderModel.find().exec();
+    return await query;
   }
 
   async getPreOrderById(id: string): Promise<PreOrder> {
