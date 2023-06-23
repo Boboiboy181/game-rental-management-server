@@ -12,7 +12,6 @@ import { CreatePreOrderDto } from './dtos/create-pre-order.dto';
 import { UpdatePreOrderDto } from './dtos/update-pre-order.dto';
 import { ApiTags, ApiResponse, ApiOkResponse, ApiBody } from '@nestjs/swagger';
 import { PreOrder } from './schemas/pre-order.schema';
-import { FilterPreOrderDto } from './dtos/filter-pre-order.dto';
 import { RentalDaysEnum } from './enums/rental-days.enum';
 
 @ApiTags('pre-order')
@@ -48,10 +47,8 @@ export class PreOrderController {
 
   @Get()
   @ApiOkResponse({ type: [PreOrder] })
-  getCustomers(
-    @Body() filterPreOrderDto: FilterPreOrderDto,
-  ): Promise<PreOrder[]> {
-    return this.preOrderService.getPreOrder(filterPreOrderDto);
+  getCustomers(): Promise<PreOrder[]> {
+    return this.preOrderService.getPreOrder();
   }
 
   @Get(':id')
