@@ -12,7 +12,6 @@ import { RentalDaysEnum } from './enums/rental-days.enum';
 import { CustomerService } from 'src/customer/customer.service';
 import { VideoGameService } from 'src/video-game/video-game.service';
 import { MailerService } from '@nestjs-modules/mailer';
-import { Customer } from 'src/customer/schemas/customer.schema';
 
 @Injectable()
 export class PreOrderService {
@@ -144,7 +143,7 @@ export class PreOrderService {
   }
 
   async getPreOrderById(id: string): Promise<PreOrder> {
-    return await this.preOrderModel.findById(id).exec();
+    return await this.preOrderModel.findById(id).populate('customer').exec();
   }
 
   // update(id: number, updatePreOrderDto: UpdatePreOrderDto) {
