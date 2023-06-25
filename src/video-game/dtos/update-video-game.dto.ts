@@ -20,4 +20,9 @@ export class UpdateVideoGameDto extends PartialType(CreateVideoGameDto) {
   @IsOptional()
   @IsNumber()
   quantity?: number;
+
+  @ApiProperty({ type: Number })
+  @IsOptional()
+  @IsNumber()
+  price?: number;
 }
