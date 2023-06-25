@@ -139,6 +139,7 @@ export class PreOrderService {
     query.setOptions({ lean: true });
     query.populate('customer');
     query.populate('rentedGames.game');
+    query.sort({ createdAt: -1 });
     return await query.exec();
   }
 
