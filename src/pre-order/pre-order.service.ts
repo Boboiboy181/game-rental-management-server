@@ -143,7 +143,11 @@ export class PreOrderService {
   }
 
   async getPreOrderById(id: string): Promise<PreOrder> {
-    return await this.preOrderModel.findById(id).populate('customer').exec();
+    return await this.preOrderModel
+      .findById(id)
+      .populate('customer')
+      .populate('rentedGames.game')
+      .exec();
   }
 
   // update(id: number, updatePreOrderDto: UpdatePreOrderDto) {
