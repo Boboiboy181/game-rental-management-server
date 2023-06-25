@@ -12,6 +12,7 @@ import { RentalDaysEnum } from './enums/rental-days.enum';
 import { CustomerService } from 'src/customer/customer.service';
 import { VideoGameService } from 'src/video-game/video-game.service';
 import { MailerService } from '@nestjs-modules/mailer';
+import { Customer } from 'src/customer/schemas/customer.schema';
 
 @Injectable()
 export class PreOrderService {
@@ -134,9 +135,11 @@ export class PreOrderService {
     return await preOrder.save();
   }
 
-  async getPreOrder(): Promise<PreOrder[]> {
+  async getPreOrders(): Promise<PreOrder[]> {
     const query = this.preOrderModel.find();
     query.setOptions({ lean: true });
+    query.populate('customer');
+    query.populate('rentedGames.game');
     return await query.exec();
   }
 

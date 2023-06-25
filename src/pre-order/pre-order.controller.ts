@@ -47,8 +47,8 @@ export class PreOrderController {
 
   @Get()
   @ApiOkResponse({ type: [PreOrder] })
-  getPreOrder(): Promise<PreOrder[]> {
-    return this.preOrderService.getPreOrder();
+  getPreOrders(): Promise<PreOrder[]> {
+    return this.preOrderService.getPreOrders();
   }
 
   @Get(':id')
