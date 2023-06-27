@@ -117,7 +117,11 @@ export class RentalService {
   }
 
   async getRentalById(id: string): Promise<Rental> {
-    const result = await this.rentalModel.findById(id).exec();
+    const result = await this.rentalModel
+      .findById(id)
+      .populate('customer')
+      .populate('rentedGames.game')
+      .exec();
     if (!result) {
       throw new Error(`Rental with id ${id} not found`);
     }
