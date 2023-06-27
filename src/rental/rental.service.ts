@@ -126,8 +126,8 @@ export class RentalService {
   async getRentalById(id: string): Promise<Rental> {
     const result = await this.rentalModel
       .findById(id)
-      .populate('customer', 'customerName')
-      .populate('rentedGames.game', 'productName')
+      .populate('customer', 'customerName phoneNumber')
+      .populate('rentedGames.game', 'productName price')
       .exec();
     if (!result) {
       throw new NotFoundException(`Rental with id ${id} not found`);
@@ -141,8 +141,8 @@ export class RentalService {
   ): Promise<Rental> {
     const updated = await this.rentalModel
       .findByIdAndUpdate(id, updateRentalDto, { new: true })
-      .populate('customer', 'customerName')
-      .populate('rentedGames.game', 'productName')
+      .populate('customer', 'customerName phoneNumber')
+      .populate('rentedGames.game', 'productName price')
       .exec();
 
     if (!updated) {
