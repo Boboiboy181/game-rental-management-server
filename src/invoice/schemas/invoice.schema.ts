@@ -1,12 +1,14 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Schema as MongooseSchema } from 'mongoose';
-import { VideoGame } from 'src/video-game/schemas/video-game.schema';
 import { Customer } from 'src/customer/schemas/customer.schema';
+import { VideoGame } from 'src/video-game/schemas/video-game.schema';
+import { Voucher } from './voucher.schema';
+import { Return } from 'src/return/schemas/return.schema';
 
-export type PreOrderDocument = HydratedDocument<PreOrder>;
+export type InvoiceDocument = HydratedDocument<Invoice>;
 
 @Schema({ timestamps: true })
-export class PreOrder {
+export class Invoice {
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Customer' })
   customer: Customer;
 
@@ -16,6 +18,8 @@ export class PreOrder {
       preOrderQuantity: Number,
       numberOfRentalDays: Number,
       returnDate: Date,
+      daysPastDue: Number,
+      fine: Number,
     },
   ])
   rentedGames: [
@@ -24,14 +28,22 @@ export class PreOrder {
       preOrderQuantity: number;
       numberOfRentalDays: number;
       returnDate: Date;
+      daysPastDue: number;
+      fine: number;
     },
   ];
 
+  @Prop([{ type: MongooseSchema.Types.ObjectId, ref: 'Voucher' }])
+  voucher: Voucher[];
+
   @Prop()
-  estimatedPrice: number;
+  fine: number;
+
+  @Prop()
+  finalPrice: number;
+
+  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Return' })
+  return: Return;
 }
 
-export const PreOrderSchema = SchemaFactory.createForClass(PreOrder);
-
-// auto delete document after 6 hours
-PreOrderSchema.index({ createAt: 1 }, { expireAfterSeconds: 21600 });
+export const InvoiceSchema = SchemaFactory.createForClass(Invoice);

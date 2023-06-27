@@ -1,13 +1,14 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Schema as MongooseSchema } from 'mongoose';
-import { VideoGame } from '../../video-game/schemas/video-game.schema';
-import { Customer } from '../../customer/schemas/customer.schema';
-import { ReturnStateEnum } from '../enums/return-state.enum';
+import { Customer } from 'src/customer/schemas/customer.schema';
+import { VideoGame } from 'src/video-game/schemas/video-game.schema';
+import { Rental } from 'src/rental/schemas/rental.schema';
+import { PaymentStateEnum } from '../enum/payment-state.enum';
 
-export type RentalDocument = HydratedDocument<Rental>;
+export type ReturnDocument = HydratedDocument<Return>;
 
 @Schema({ timestamps: true })
-export class Rental {
+export class Return {
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Customer' })
   customer: Customer;
 
@@ -17,6 +18,8 @@ export class Rental {
       preOrderQuantity: Number,
       numberOfRentalDays: Number,
       returnDate: Date,
+      daysPastDue: Number,
+      fine: Number,
     },
   ])
   rentedGames: [
@@ -25,6 +28,8 @@ export class Rental {
       preOrderQuantity: number;
       numberOfRentalDays: number;
       returnDate: Date;
+      daysPastDue: number;
+      fine: number;
     },
   ];
 
@@ -34,11 +39,11 @@ export class Rental {
   @Prop()
   estimatedPrice: number;
 
-  @Prop()
-  returnValue: number;
+  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Rental' })
+  rental: Rental;
 
   @Prop()
-  returnState: ReturnStateEnum;
+  paymentState: PaymentStateEnum;
 }
 
-export const RentalSchema = SchemaFactory.createForClass(Rental);
+export const ReturnSchema = SchemaFactory.createForClass(Return);

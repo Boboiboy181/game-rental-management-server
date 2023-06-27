@@ -19,10 +19,11 @@ export class VideoGameService {
     createVideoGameDto: CreateVideoGameDto,
     imageUrl: string,
   ): Promise<VideoGame> {
+    const { system, genre } = createVideoGameDto;
     const videoGame = new this.videoGameModel({
       ...createVideoGameDto,
-      system: VideoGameSystemEnum.Default,
-      genre: VideoGameGenreEnum.Default,
+      system: VideoGameSystemEnum[system],
+      genre: VideoGameGenreEnum[genre],
       slug: slugify(createVideoGameDto.productName, { lower: true }),
     });
     videoGame.imageUrl.push(imageUrl);

@@ -23,81 +23,88 @@ export class RentalService {
   ) {}
 
   async createRental(createRentalDto: CreateRentalDto): Promise<Rental> {
-    const {
-      customerId,
-      phoneNumber,
-      customerName,
-      rentedGames,
-      numberOfRentalDays,
-      deposit,
-    } = createRentalDto;
+    const { customerID, phoneNumber, customerName, rentedGames, deposit } =
+      createRentalDto;
     // find customer
-    const customer = await this.customerService.getCustomerById(customerId, {
+    const customer = await this.customerService.getCustomerById(customerID, {
       customerName,
       phoneNumber,
     });
     // create new rental
     const rental = new this.rentalModel({
       customer,
-      numberOfRentalDays: RentalDaysEnum[numberOfRentalDays],
       deposit,
+      returnValue: 0,
       returnState: ReturnStateEnum.NOT_RETURNED,
     });
     // find games and calculate total price
-    const totalGamesPrice = rentedGames.map(async (rentedGame) => {
-      const { gameId, quantity } = rentedGame;
+    const pricePerGame = rentedGames.map(async (rentedGame) => {
+      const { gameID, preOrderQuantity, numberOfRentalDays } = rentedGame;
       // find game
-      const videoGame = await this.videoGameService.getVideoGameById(gameId);
-      // add game and update quantity
+      const videoGame = await this.videoGameService.getVideoGameById(gameID);
 
+      const returnDate = new Date(Date.now());
+      returnDate.setDate(
+        returnDate.getDate() + RentalDaysEnum[numberOfRentalDays],
+      );
+
+      // add game and update quantity
       if (
-        videoGame.quantity >= quantity &&
-        quantity > 0 &&
+        videoGame.quantity >= preOrderQuantity &&
+        preOrderQuantity > 0 &&
         videoGame.quantity > 0
       ) {
-        rental.rentedGames.push({ game: videoGame, quantity });
-        await this.videoGameService.updateProduct(gameId, {
-          quantity: videoGame.quantity - quantity,
+        rental.rentedGames.push({
+          game: videoGame,
+          preOrderQuantity,
+          numberOfRentalDays: RentalDaysEnum[numberOfRentalDays],
+          returnDate,
+        });
+        await this.videoGameService.updateProduct(gameID, {
+          quantity: videoGame.quantity - preOrderQuantity,
         });
       } else {
         throw new BadRequestException(
           `Game ${videoGame.productName} is out of stock`,
         );
       }
-      return videoGame.price * quantity;
+
+      // calculate price per game
+      let videoGamePrice: number = videoGame.price;
+      switch (numberOfRentalDays) {
+        case 'ONE_DAY':
+          videoGamePrice = videoGame.price;
+          break;
+        case 'THREE_DAYS':
+          videoGamePrice = videoGame.price * 0.89;
+          break;
+        case 'SEVEN_DAYS':
+          videoGamePrice = videoGame.price * 0.87;
+          break;
+        case 'FOURTEEN_DAYS':
+          videoGamePrice = videoGame.price * 0.85;
+          break;
+        case 'THIRTY_DAYS':
+          videoGamePrice = videoGame.price * 0.83;
+          break;
+        case 'SIXTY_DAYS':
+          videoGamePrice = videoGame.price * 0.8;
+          break;
+        default:
+          break;
+      }
+
+      return (
+        videoGamePrice * preOrderQuantity * RentalDaysEnum[numberOfRentalDays]
+      );
     });
 
-    const totalPrice = (await Promise.all(totalGamesPrice)).reduce(
+    const totalPrice = (await Promise.all(pricePerGame)).reduce(
       (acc, price) => acc + price,
       0,
     );
+    rental.estimatedPrice = totalPrice;
 
-    // calculate return date
-    const returnDate = new Date(Date.now());
-    returnDate.setDate(returnDate.getDate() + rental.numberOfRentalDays);
-    rental.returnDate = returnDate;
-
-    // calculate estimated price
-    switch (rental.numberOfRentalDays) {
-      case RentalDaysEnum.ONE_DAY:
-        rental.estimatedPrice = totalPrice;
-        break;
-      case RentalDaysEnum.THREE_DAYS:
-        rental.estimatedPrice = totalPrice * 0.85;
-        break;
-      case RentalDaysEnum.SEVEN_DAYS:
-        rental.estimatedPrice = totalPrice * 0.85;
-        break;
-      case RentalDaysEnum.THIRTY_DAYS:
-        rental.estimatedPrice = totalPrice * 0.83;
-        break;
-      case RentalDaysEnum.SIXTY_DAYS:
-        rental.estimatedPrice = totalPrice * 0.8;
-        break;
-      default:
-        rental.estimatedPrice = totalPrice;
-        break;
-    }
     return await rental.save();
   }
 
@@ -123,7 +130,7 @@ export class RentalService {
       .populate('rentedGames.game', 'productName')
       .exec();
     if (!result) {
-      throw new Error(`Rental with id ${id} not found`);
+      throw new NotFoundException(`Rental with id ${id} not found`);
     }
     return result;
   }

@@ -1,85 +1,159 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreatePreOrderDto } from './dtos/create-pre-order.dto';
-import { UpdatePreOrderDto } from './dtos/update-pre-order.dto';
+// import { UpdatePreOrderDto } from './dtos/update-pre-order.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { PreOrder } from './schemas/pre-order.schema';
-import { VideoGame } from 'src/video-game/schemas/video-game.schema';
 import { RentalDaysEnum } from './enums/rental-days.enum';
-import { FilterPreOrderDto } from './dtos/filter-pre-order.dto';
+import { CustomerService } from 'src/customer/customer.service';
+import { VideoGameService } from 'src/video-game/video-game.service';
+import { MailerService } from '@nestjs-modules/mailer';
 
 @Injectable()
 export class PreOrderService {
   constructor(
     @InjectModel('PreOrder') private readonly preOrderModel: Model<PreOrder>,
-    @InjectModel('VideoGame') private readonly videoGameModel: Model<VideoGame>,
+    private readonly customerService: CustomerService,
+    private readonly videoGameService: VideoGameService,
+    private readonly mailerService: MailerService,
   ) {}
 
   async createPreOrder(
     createPreOrderDto: CreatePreOrderDto,
   ): Promise<PreOrder> {
-    const { customerName, rentedGames, numberOfRentalDays } = createPreOrderDto;
+    const { customerID, email, phoneNumber, customerName, rentedGames } =
+      createPreOrderDto;
+
+    // find customer
+    const customer = await this.customerService.getCustomerById(customerID, {
+      email,
+      customerName,
+      phoneNumber,
+    });
 
     // create new pre-order
     const preOrder = new this.preOrderModel({
-      customerName,
-      numberOfRentalDays: RentalDaysEnum[numberOfRentalDays],
+      customer,
     });
 
     // find games and calculate total price
-    let totalGamesPrice = 0;
-    for (const rentedGame of rentedGames) {
-      const { game, quantity } = rentedGame;
+    const totalGamesPrice = rentedGames.map(async (rentedGame) => {
+      const { gameID, preOrderQuantity, numberOfRentalDays } = rentedGame;
+      const videoGame = await this.videoGameService.getVideoGameById(gameID);
 
-      const videoGame = await this.videoGameModel
-        .findOne({
-          productName: { $regex: new RegExp(game, 'i') },
-        })
-        .exec();
-      if (!videoGame) {
-        throw new Error(`Game ${game} not found`);
+      const returnDate = new Date(Date.now());
+      returnDate.setDate(
+        returnDate.getDate() + RentalDaysEnum[numberOfRentalDays],
+      );
+
+      if (videoGame.quantity >= preOrderQuantity && preOrderQuantity > 0) {
+        preOrder.rentedGames.push({
+          game: videoGame,
+          preOrderQuantity,
+          numberOfRentalDays: RentalDaysEnum[numberOfRentalDays],
+          returnDate,
+        });
+      } else {
+        throw new BadRequestException(
+          `Game ${videoGame.productName} is out of stock`,
+        );
       }
-      totalGamesPrice += videoGame.price * quantity;
-      preOrder.rentedGames.push({ game: videoGame, quantity });
-    }
 
-    // calculate return date
-    const returnDate = new Date(Date.now());
-    returnDate.setDate(returnDate.getDate() + preOrder.numberOfRentalDays);
-    preOrder.returnDate = returnDate;
+      let videoGamePrice: number = videoGame.price;
 
-    // calculate estimated price
-    if (preOrder.numberOfRentalDays == 3 || preOrder.numberOfRentalDays == 14) {
-      preOrder.estimatedPrice = totalGamesPrice * 0.85;
-    } else if (preOrder.numberOfRentalDays == 30) {
-      preOrder.estimatedPrice = totalGamesPrice * 0.83;
-    } else if (preOrder.numberOfRentalDays == 60) {
-      preOrder.estimatedPrice = totalGamesPrice * 0.8;
-    } else {
-      preOrder.estimatedPrice = totalGamesPrice;
-    }
+      switch (numberOfRentalDays) {
+        case 'ONE_DAY':
+          videoGamePrice = videoGame.price;
+          break;
+        case 'THREE_DAYS':
+          videoGamePrice = videoGame.price * 0.89;
+          break;
+        case 'SEVEN_DAYS':
+          videoGamePrice = videoGame.price * 0.87;
+          break;
+        case 'FOURTEEN_DAYS':
+          videoGamePrice = videoGame.price * 0.85;
+          break;
+        case 'THIRTY_DAYS':
+          videoGamePrice = videoGame.price * 0.83;
+          break;
+        case 'SIXTY_DAYS':
+          videoGamePrice = videoGame.price * 0.8;
+          break;
+        default:
+          break;
+      }
+
+      return (
+        videoGamePrice * preOrderQuantity * RentalDaysEnum[numberOfRentalDays]
+      );
+    });
+
+    const totalPrice = (await Promise.all(totalGamesPrice)).reduce(
+      (acc, price) => acc + price,
+      0,
+    );
+    preOrder.estimatedPrice = totalPrice;
+
+    const formatDate = (dateString: string) => {
+      const date = new Date(dateString);
+      const options: Intl.DateTimeFormatOptions = {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+      };
+      return new Intl.DateTimeFormat('vi-VN', options).format(date);
+    };
+
+    // send email
+    await this.mailerService.sendMail({
+      to: email,
+      subject: 'Pre-order confirmation',
+      template: './pre-order-confirmation',
+      context: {
+        customerName,
+        email,
+        phoneNumber,
+        rentedGames: preOrder.rentedGames.map((game) => {
+          return {
+            name: game.game.productName,
+            quantity: game.preOrderQuantity,
+            price: game.game.price,
+            rentalDays: game.numberOfRentalDays,
+            returnDate: formatDate(game.returnDate.toString()),
+          };
+        }),
+        totalPrice: preOrder.estimatedPrice,
+      },
+    });
 
     return await preOrder.save();
   }
 
-  async getPreOrder(filterPreOrderDto: FilterPreOrderDto): Promise<PreOrder[]> {
-    const { name } = filterPreOrderDto;
-
+  async getPreOrders(): Promise<PreOrder[]> {
     const query = this.preOrderModel.find();
     query.setOptions({ lean: true });
-    if (name) {
-      query.where({ name: { $regex: name, $options: 'i' } });
-    }
+    query.populate('customer');
+    query.populate('rentedGames.game');
+    query.sort({ createdAt: -1 });
     return await query.exec();
   }
 
   async getPreOrderById(id: string): Promise<PreOrder> {
-    return await this.preOrderModel.findById(id).exec();
+    return await this.preOrderModel
+      .findById(id)
+      .populate('customer')
+      .populate('rentedGames.game')
+      .exec();
   }
 
-  update(id: number, updatePreOrderDto: UpdatePreOrderDto) {
-    return `This action updates a #${id} preOrder`;
-  }
+  // update(id: number, updatePreOrderDto: UpdatePreOrderDto) {
+  //   return `This action updates a #${id} preOrder`;
+  // }
 
   async deletePreOrder(id: string): Promise<void> {
     const result = await this.getPreOrderById(id);

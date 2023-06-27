@@ -33,4 +33,12 @@ export class CreateVideoGameDto {
   @IsNotEmpty()
   @IsString()
   language: string;
+
+  @IsNotEmpty()
+  @IsString()
+  genre: string;
+
+  @IsNotEmpty()
+  @IsString()
+  system: string;
 }

@@ -65,11 +65,11 @@ export class CustomerService {
     } catch (error) {
       if (error instanceof NotFoundException || error.name === 'CastError') {
         if (createCustomerDto) {
-          const { phoneNumber, customerName } = createCustomerDto;
+          const { phoneNumber, customerName, email } = createCustomerDto;
           return await this.createCustomer({
             customerName,
             phoneNumber,
-            email: '',
+            email,
             address: '',
           });
         } else {

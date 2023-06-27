@@ -7,21 +7,16 @@ import {
   MinLength,
 } from 'class-validator';
 
-export class FilterRegisterRentalPackageListDto {
+export class FilterReturnDto {
   @ApiPropertyOptional()
-  @IsString()
   @IsOptional()
-  packageName?: string;
-
-  @ApiPropertyOptional()
-  @IsString()
-  @IsOptional()
-  name?: string;
-
-  @ApiPropertyOptional({ example: '0123456789' })
   @IsNumberString()
   @MaxLength(10)
   @MinLength(10)
+  phoneNumber?: number;
+
+  @ApiPropertyOptional()
   @IsOptional()
-  phoneNumber?: string;
+  @IsString()
+  name?: string;
 }
