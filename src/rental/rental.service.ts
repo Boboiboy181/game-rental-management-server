@@ -105,8 +105,8 @@ export class RentalService {
     const { phoneNumber, customerName } = filterRentaldto;
     const query = this.rentalModel.find();
     query.setOptions({ lean: true });
-    query.populate('customer');
-    query.populate('rentedGames.game');
+    query.populate('customer', 'customerName');
+    query.populate('rentedGames.game', 'productName');
     if (customerName) {
       query.where({ customerName: { $regex: customerName, $options: 'i' } });
     }
@@ -119,8 +119,8 @@ export class RentalService {
   async getRentalById(id: string): Promise<Rental> {
     const result = await this.rentalModel
       .findById(id)
-      .populate('customer')
-      .populate('rentedGames.game')
+      .populate('customer', 'customerName')
+      .populate('rentedGames.game', 'productName')
       .exec();
     if (!result) {
       throw new Error(`Rental with id ${id} not found`);
