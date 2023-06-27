@@ -132,11 +132,11 @@ export class RentalService {
     id: string,
     updateRentalDto: UpdateRentalDto,
   ): Promise<Rental> {
-    const updated = await this.rentalModel.findByIdAndUpdate(
-      id,
-      updateRentalDto,
-      { new: true },
-    );
+    const updated = await this.rentalModel
+      .findByIdAndUpdate(id, updateRentalDto, { new: true })
+      .populate('customer', 'customerName')
+      .populate('rentedGames.game', 'productName')
+      .exec();
 
     if (!updated) {
       throw new NotFoundException(`Rental with id ${id} not found`);
