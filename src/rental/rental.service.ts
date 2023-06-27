@@ -105,6 +105,8 @@ export class RentalService {
     const { phoneNumber, customerName } = filterRentaldto;
     const query = this.rentalModel.find();
     query.setOptions({ lean: true });
+    query.populate('customer');
+    query.populate('rentedGames.game');
     if (customerName) {
       query.where({ customerName: { $regex: customerName, $options: 'i' } });
     }
