@@ -8,6 +8,7 @@ import {
   MinLength,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 
 export class CreateRentalDto {
   @ApiPropertyOptional()
@@ -40,5 +41,6 @@ export class CreateRentalDto {
   @ApiProperty()
   @IsNotEmpty()
   @IsNumber()
+  @Type(() => Number)
   deposit: number;
 }
