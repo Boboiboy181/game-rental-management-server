@@ -7,12 +7,14 @@ import { VideoGameModule } from '../video-game/video-game.module';
 import { CustomerModule } from '../customer/customer.module';
 import { VideoGameService } from '../video-game/video-game.service';
 import { CustomerService } from '../customer/customer.service';
+import { PreOrderModule } from '../pre-order/pre-order.module';
 
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: 'Rental', schema: RentalSchema }]),
     VideoGameModule,
     CustomerModule,
+    PreOrderModule,
   ],
   controllers: [RentalController],
   providers: [RentalService, VideoGameService, CustomerService],

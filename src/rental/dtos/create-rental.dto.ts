@@ -1,5 +1,4 @@
 import {
-  IsNotEmpty,
   IsNumber,
   IsNumberString,
   IsOptional,
@@ -7,30 +6,35 @@ import {
   MaxLength,
   MinLength,
 } from 'class-validator';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 
 export class CreateRentalDto {
   @ApiPropertyOptional()
   @IsOptional()
   @IsString()
+  preOrderID?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
   customerID?: string;
 
-  @ApiProperty()
-  @IsNotEmpty()
+  @ApiPropertyOptional()
+  @IsOptional()
   @IsNumberString()
   @MaxLength(10)
   @MinLength(10)
-  phoneNumber: number;
+  phoneNumber?: number;
 
-  @ApiProperty()
-  @IsNotEmpty()
+  @ApiPropertyOptional()
+  @IsOptional()
   @IsString()
-  customerName: string;
+  customerName?: string;
 
-  @ApiProperty()
-  @IsNotEmpty()
-  rentedGames: [
+  @ApiPropertyOptional()
+  @IsOptional()
+  rentedGames?: [
     {
       gameID: string;
       preOrderQuantity: number;
@@ -38,8 +42,8 @@ export class CreateRentalDto {
     },
   ];
 
-  @ApiProperty()
-  @IsNotEmpty()
+  @ApiPropertyOptional()
+  @IsOptional()
   @IsNumber()
   @Type(() => Number)
   deposit: number;

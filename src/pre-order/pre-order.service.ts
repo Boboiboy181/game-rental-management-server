@@ -109,14 +109,16 @@ export class PreOrderService {
       return new Intl.DateTimeFormat('vi-VN', options).format(date);
     };
 
+    const emailToSent = customer ? customer.email : email;
+
     // send email
     await this.mailerService.sendMail({
-      to: email,
+      to: emailToSent,
       subject: 'Pre-order confirmation',
       template: './pre-order-confirmation',
       context: {
         customerName,
-        email,
+        email: emailToSent,
         phoneNumber,
         rentedGames: preOrder.rentedGames.map((game) => {
           return {

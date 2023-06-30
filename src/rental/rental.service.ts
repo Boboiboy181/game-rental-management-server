@@ -13,6 +13,7 @@ import { VideoGameService } from '../video-game/video-game.service';
 import { CustomerService } from '../customer/customer.service';
 import { ReturnStateEnum } from './enums/return-state.enum';
 import { FilterRentalDto } from './dtos/filter-rental.dto';
+import { PreOrderService } from '../pre-order/pre-order.service';
 
 @Injectable()
 export class RentalService {
@@ -20,11 +21,23 @@ export class RentalService {
     @InjectModel('Rental') private readonly rentalModel: Model<Rental>,
     private readonly videoGameService: VideoGameService,
     private readonly customerService: CustomerService,
+    private readonly preOrderService: PreOrderService,
   ) {}
 
   async createRental(createRentalDto: CreateRentalDto): Promise<Rental> {
-    const { customerID, phoneNumber, customerName, rentedGames, deposit } =
-      createRentalDto;
+    const {
+      customerID,
+      phoneNumber,
+      customerName,
+      rentedGames,
+      deposit,
+      preOrderID,
+    } = createRentalDto;
+
+    if (preOrderID) {
+      return await this.createRentalFromPreOrder(preOrderID);
+    }
+
     // find customer
     const customer = await this.customerService.getCustomerById(customerID, {
       customerName,
@@ -106,6 +119,19 @@ export class RentalService {
     rental.estimatedPrice = totalPrice;
 
     return await rental.save();
+  }
+
+  async createRentalFromPreOrder(preOrderID: string): Promise<Rental> {
+    const preOrder = await this.preOrderService.getPreOrderById(preOrderID);
+    const rental = new this.rentalModel({
+      customer: preOrder.customer,
+      rentedGames: preOrder.rentedGames,
+      estimatedPrice: preOrder.estimatedPrice,
+      deposit: 0,
+      returnValue: 0,
+      returnState: ReturnStateEnum.NOT_RETURNED,
+    });
+    return rental.save();
   }
 
   async getRental(filterRentaldto: FilterRentalDto): Promise<Rental[]> {

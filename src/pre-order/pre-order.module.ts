@@ -14,5 +14,6 @@ import { CustomerModule } from 'src/customer/customer.module';
   ],
   controllers: [PreOrderController],
   providers: [PreOrderService],
+  exports: [PreOrderService],
 })
 export class PreOrderModule {}
