@@ -131,7 +131,7 @@ export class RentalService {
       returnValue: 0,
       returnState: ReturnStateEnum.NOT_RETURNED,
     });
-    return rental.save();
+    return await rental.save();
   }
 
   async getRental(filterRentaldto: FilterRentalDto): Promise<Rental[]> {

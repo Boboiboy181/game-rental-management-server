@@ -46,5 +46,5 @@ export class CreateRentalDto {
   @IsOptional()
   @IsNumber()
   @Type(() => Number)
-  deposit: number;
+  deposit?: number;
 }
