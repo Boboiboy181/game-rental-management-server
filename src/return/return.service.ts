@@ -10,6 +10,8 @@ import { PaymentStateEnum } from './enum/payment-state.enum';
 import { VideoGameService } from 'src/video-game/video-game.service';
 import { ReturnStateEnum } from 'src/rental/enums/return-state.enum';
 import { FilterReturnDto } from './dtos/filter-return.dto';
+import { priceByDays } from 'src/utils/price-by-days';
+import { log } from 'console';
 
 @Injectable()
 export class ReturnService {
@@ -39,7 +41,7 @@ export class ReturnService {
       const videoGame = await this.videoGameService.getVideoGameById(gameID);
 
       const gameToBeReturned = rental.rentedGames.filter(
-        (rentedGame) => rentedGame.game.toString() === gameID,
+        (rentedGame) => rentedGame.game.productName === videoGame.productName,
       );
 
       const numberOfRentalDays = gameToBeReturned[0].numberOfRentalDays;
@@ -67,30 +69,8 @@ export class ReturnService {
         quantity: videoGame.quantity + preOrderQuantity,
       });
 
-      // calculate price per game
-      let videoGamePrice: number = videoGame.price;
-      switch (numberOfRentalDays) {
-        case 1:
-          videoGamePrice = videoGame.price;
-          break;
-        case 3:
-          videoGamePrice = videoGame.price * 0.89;
-          break;
-        case 7:
-          videoGamePrice = videoGame.price * 0.87;
-          break;
-        case 14:
-          videoGamePrice = videoGame.price * 0.85;
-          break;
-        case 30:
-          videoGamePrice = videoGame.price * 0.83;
-          break;
-        case 60:
-          videoGamePrice = videoGame.price * 0.8;
-          break;
-        default:
-          break;
-      }
+      // calculate price by days
+      const videoGamePrice = priceByDays(videoGame, numberOfRentalDays);
 
       return (
         videoGamePrice * preOrderQuantity * numberOfRentalDays + returnFine

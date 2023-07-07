@@ -34,4 +34,4 @@ export class PreOrder {
 export const PreOrderSchema = SchemaFactory.createForClass(PreOrder);
 
 // auto delete document after 6 hours
-PreOrderSchema.index({ createAt: 1 }, { expireAfterSeconds: 21600 });
+PreOrderSchema.index({ createdAt: 1 }, { expireAfterSeconds: 21600 });

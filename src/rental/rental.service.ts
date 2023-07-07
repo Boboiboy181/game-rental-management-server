@@ -14,6 +14,7 @@ import { CustomerService } from '../customer/customer.service';
 import { ReturnStateEnum } from './enums/return-state.enum';
 import { FilterRentalDto } from './dtos/filter-rental.dto';
 import { PreOrderService } from '../pre-order/pre-order.service';
+import { priceByDays } from 'src/utils/price-by-days';
 
 @Injectable()
 export class RentalService {
@@ -82,30 +83,11 @@ export class RentalService {
         );
       }
 
-      // calculate price per game
-      let videoGamePrice: number = videoGame.price;
-      switch (numberOfRentalDays) {
-        case 'ONE_DAY':
-          videoGamePrice = videoGame.price;
-          break;
-        case 'THREE_DAYS':
-          videoGamePrice = videoGame.price * 0.89;
-          break;
-        case 'SEVEN_DAYS':
-          videoGamePrice = videoGame.price * 0.87;
-          break;
-        case 'FOURTEEN_DAYS':
-          videoGamePrice = videoGame.price * 0.85;
-          break;
-        case 'THIRTY_DAYS':
-          videoGamePrice = videoGame.price * 0.83;
-          break;
-        case 'SIXTY_DAYS':
-          videoGamePrice = videoGame.price * 0.8;
-          break;
-        default:
-          break;
-      }
+      // calculate price by days
+      const videoGamePrice = priceByDays(
+        videoGame,
+        RentalDaysEnum[numberOfRentalDays],
+      );
 
       return (
         videoGamePrice * preOrderQuantity * RentalDaysEnum[numberOfRentalDays]

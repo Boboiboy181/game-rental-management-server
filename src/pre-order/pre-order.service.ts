@@ -12,6 +12,7 @@ import { RentalDaysEnum } from './enums/rental-days.enum';
 import { CustomerService } from 'src/customer/customer.service';
 import { VideoGameService } from 'src/video-game/video-game.service';
 import { MailerService } from '@nestjs-modules/mailer';
+import { priceByDays } from 'src/utils/price-by-days';
 
 @Injectable()
 export class PreOrderService {
@@ -63,30 +64,11 @@ export class PreOrderService {
         );
       }
 
-      let videoGamePrice: number = videoGame.price;
-
-      switch (numberOfRentalDays) {
-        case 'ONE_DAY':
-          videoGamePrice = videoGame.price;
-          break;
-        case 'THREE_DAYS':
-          videoGamePrice = videoGame.price * 0.89;
-          break;
-        case 'SEVEN_DAYS':
-          videoGamePrice = videoGame.price * 0.87;
-          break;
-        case 'FOURTEEN_DAYS':
-          videoGamePrice = videoGame.price * 0.85;
-          break;
-        case 'THIRTY_DAYS':
-          videoGamePrice = videoGame.price * 0.83;
-          break;
-        case 'SIXTY_DAYS':
-          videoGamePrice = videoGame.price * 0.8;
-          break;
-        default:
-          break;
-      }
+      // calculate price by days
+      const videoGamePrice = priceByDays(
+        videoGame,
+        RentalDaysEnum[numberOfRentalDays],
+      );
 
       return (
         videoGamePrice * preOrderQuantity * RentalDaysEnum[numberOfRentalDays]
