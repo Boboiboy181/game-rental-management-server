@@ -106,42 +106,17 @@ export class ReturnService {
     const { phoneNumber, name } = filterReturnDto;
     const query = this.returnlModel.find();
     query.setOptions({ lean: true });
-
-    if (name) {
-      const customer = await this.customerModel.findOne({
-        customerName: { $regex: name, $options: 'i' },
-      });
-      if (!customer) {
-        throw new NotFoundException(
-          `Return form with customer's name: ${name} not found`,
-        );
-      }
-      const customer_id: string = customer._id.toHexString();
-      query.where('customer').equals(customer_id);
-    }
-    if (phoneNumber) {
-      const customer = await this.customerModel.findOne({
-        phoneNumber: { $regex: phoneNumber, $options: 'i' },
-      });
-      if (!customer) {
-        throw new NotFoundException(
-          `Return form with customer's phone number: ${phoneNumber} not found`,
-        );
-      }
-      const customer_id: string = customer._id.toHexString();
-      query.where('customer').equals(customer_id);
-    }
-    const results = await query.exec();
-    if (results.length === 0) {
-      throw new NotFoundException(
-        `Rental Package Registeration cannot be found`,
-      );
-    }
-    return results;
+    query.populate('customer', 'customerName');
+    query.populate('rentedGames.game', 'productName price');
+    return await query.exec();
   }
 
   async getReturnTicketById(id: string): Promise<Return> {
-    const returnTicket = await this.returnlModel.findById(id).exec();
+    const returnTicket = await this.returnlModel
+    .findById(id)
+    .populate('customer', 'customerName')
+    .populate('rentedGames.game', 'productName price')
+    .exec();
     if (!returnTicket) {
       throw new Error(`Return ticket with ${id} not found`);
     }
@@ -154,6 +129,8 @@ export class ReturnService {
   ): Promise<Return> {
     const updated = await this.returnlModel
       .findByIdAndUpdate(id, updateReturnDto, { new: true })
+      .populate('customer', 'customerName')
+      .populate('rentedGames.game', 'productName price')
       .exec();
 
     if (!updated) {
