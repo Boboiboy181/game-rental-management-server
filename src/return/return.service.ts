@@ -107,6 +107,7 @@ export class ReturnService {
     const query = this.returnlModel.find();
     query.setOptions({ lean: true });
     query.populate('customer', 'customerName');
+    query.populate('rentedGames.game', 'productName price');
     return await query.exec();
   }
 
@@ -114,6 +115,7 @@ export class ReturnService {
     const returnTicket = await this.returnlModel
     .findById(id)
     .populate('customer', 'customerName')
+    .populate('rentedGames.game', 'productName price')
     .exec();
     if (!returnTicket) {
       throw new Error(`Return ticket with ${id} not found`);
@@ -128,6 +130,7 @@ export class ReturnService {
     const updated = await this.returnlModel
       .findByIdAndUpdate(id, updateReturnDto, { new: true })
       .populate('customer', 'customerName')
+      .populate('rentedGames.game', 'productName price')
       .exec();
 
     if (!updated) {
