@@ -106,7 +106,7 @@ export class ReturnService {
     const { phoneNumber, name } = filterReturnDto;
     const query = this.returnlModel.find();
     query.setOptions({ lean: true });
-    query.populate('customer', 'customerName');
+    query.populate('customer', 'customerName phoneNumber');
     query.populate('rentedGames.game', 'productName price');
     return await query.exec();
   }
@@ -114,7 +114,7 @@ export class ReturnService {
   async getReturnTicketById(id: string): Promise<Return> {
     const returnTicket = await this.returnlModel
     .findById(id)
-    .populate('customer', 'customerName')
+    .populate('customer', 'customerName phoneNumber')
     .populate('rentedGames.game', 'productName price')
     .exec();
     if (!returnTicket) {
@@ -129,7 +129,7 @@ export class ReturnService {
   ): Promise<Return> {
     const updated = await this.returnlModel
       .findByIdAndUpdate(id, updateReturnDto, { new: true })
-      .populate('customer', 'customerName')
+      .populate('customer', 'customerName phoneNumber')
       .populate('rentedGames.game', 'productName price')
       .exec();
 
