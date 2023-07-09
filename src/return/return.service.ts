@@ -47,7 +47,7 @@ export class ReturnService {
       const numberOfRentalDays = gameToBeReturned[0].numberOfRentalDays;
       const returnDate = gameToBeReturned[0].returnDate;
 
-      const daysPastDue = Math.ceil(
+      const daysPastDue = Math.floor(
         (Date.now() - returnDate.getTime()) / (1000 * 3600 * 24),
       );
 
