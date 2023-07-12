@@ -39,6 +39,9 @@ export class Rental {
 
   @Prop()
   returnState: ReturnStateEnum;
+
+  @Prop()
+  returnIDs: string[];
 }
 
 export const RentalSchema = SchemaFactory.createForClass(Rental);
