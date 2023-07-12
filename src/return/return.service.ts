@@ -3,7 +3,7 @@ import { CreateReturnDto } from './dtos/create-return.dto';
 import { UpdateReturnDto } from './dtos/update-return.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Return } from './schemas/return.schema';
+import { Return, ReturnDocument } from './schemas/return.schema';
 import { Customer } from 'src/customer/schemas/customer.schema';
 import { RentalService } from 'src/rental/rental.service';
 import { PaymentStateEnum } from './enum/payment-state.enum';
@@ -11,7 +11,6 @@ import { VideoGameService } from 'src/video-game/video-game.service';
 import { ReturnStateEnum } from 'src/rental/enums/return-state.enum';
 import { FilterReturnDto } from './dtos/filter-return.dto';
 import { priceByDays } from 'src/utils/price-by-days';
-import { log } from 'console';
 
 @Injectable()
 export class ReturnService {
@@ -99,7 +98,13 @@ export class ReturnService {
       });
     }
 
-    return await returnTicket.save();
+    const returnDocument: ReturnDocument = await returnTicket.save();
+
+    await this.rentalService.updateRental(rentalId, {
+      returnIDs: [...rental.returnIDs, returnDocument._id.toString()],
+    });
+
+    return returnDocument;
   }
 
   async getReturnTicket(filterReturnDto: FilterReturnDto): Promise<Return[]> {
@@ -113,10 +118,10 @@ export class ReturnService {
 
   async getReturnTicketById(id: string): Promise<Return> {
     const returnTicket = await this.returnlModel
-    .findById(id)
-    .populate('customer', 'customerName phoneNumber')
-    .populate('rentedGames.game', 'productName price')
-    .exec();
+      .findById(id)
+      .populate('customer', 'customerName phoneNumber')
+      .populate('rentedGames.game', 'productName price')
+      .exec();
     if (!returnTicket) {
       throw new Error(`Return ticket with ${id} not found`);
     }
