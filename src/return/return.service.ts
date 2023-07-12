@@ -11,6 +11,7 @@ import { VideoGameService } from 'src/video-game/video-game.service';
 import { ReturnStateEnum } from 'src/rental/enums/return-state.enum';
 import { FilterReturnDto } from './dtos/filter-return.dto';
 import { priceByDays } from 'src/utils/price-by-days';
+import { AutoCodeService } from '../auto-code/auto-code.service';
 
 @Injectable()
 export class ReturnService {
@@ -19,6 +20,7 @@ export class ReturnService {
     @InjectModel('Customer') private readonly customerModel: Model<Customer>,
     private readonly rentalService: RentalService,
     private readonly videoGameService: VideoGameService,
+    private readonly autoCodeService: AutoCodeService,
   ) {}
 
   async createReturnTicket(createReturnDto: CreateReturnDto): Promise<Return> {
@@ -27,6 +29,8 @@ export class ReturnService {
     const rental = await this.rentalService.getRentalById(rentalId);
 
     const returnTicket = new this.returnlModel({
+      returnCode: await this.autoCodeService.generateAutoCode('RSE'),
+      rentalCode: rental.rentalCode,
       paymentState: PaymentStateEnum.NOT_PAID,
       rental,
       customer: rental.customer,

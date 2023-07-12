@@ -6,6 +6,7 @@ import { ReturnSchema } from './schemas/return.schema';
 import { RentalModule } from 'src/rental/rental.module';
 import { VideoGameModule } from 'src/video-game/video-game.module';
 import { CustomerModule } from 'src/customer/customer.module';
+import { AutoCodeModule } from '../auto-code/auto-code.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { CustomerModule } from 'src/customer/customer.module';
     VideoGameModule,
     RentalModule,
     CustomerModule,
+    AutoCodeModule,
   ],
   controllers: [ReturnController],
   providers: [ReturnService],

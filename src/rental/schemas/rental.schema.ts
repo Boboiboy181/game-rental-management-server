@@ -8,6 +8,9 @@ export type RentalDocument = HydratedDocument<Rental>;
 
 @Schema({ timestamps: true })
 export class Rental {
+  @Prop({ unique: true })
+  rentalCode: string;
+
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Customer' })
   customer: Customer;
 

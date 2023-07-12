@@ -14,6 +14,7 @@ import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { join } from 'path';
 import { InvoiceModule } from './invoice/invoice.module';
+import { AutoCodeModule } from './auto-code/auto-code.module';
 
 @Module({
   imports: [
@@ -61,6 +62,7 @@ import { InvoiceModule } from './invoice/invoice.module';
     RentalModule,
     ReturnModule,
     InvoiceModule,
+    AutoCodeModule,
   ],
 })
 export class AppModule {}
