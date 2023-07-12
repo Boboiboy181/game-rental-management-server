@@ -3,7 +3,7 @@ import { CreateReturnDto } from './dtos/create-return.dto';
 import { UpdateReturnDto } from './dtos/update-return.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Return } from './schemas/return.schema';
+import { Return, ReturnDocument } from './schemas/return.schema';
 import { Customer } from 'src/customer/schemas/customer.schema';
 import { RentalService } from 'src/rental/rental.service';
 import { PaymentStateEnum } from './enum/payment-state.enum';
@@ -102,49 +102,30 @@ export class ReturnService {
       });
     }
 
-    return await returnTicket.save();
+    const returnDocument: ReturnDocument = await returnTicket.save();
+
+    await this.rentalService.updateRental(rentalId, {
+      returnIDs: [...rental.returnIDs, returnDocument._id.toString()],
+    });
+
+    return returnDocument;
   }
 
   async getReturnTicket(filterReturnDto: FilterReturnDto): Promise<Return[]> {
     const { phoneNumber, name } = filterReturnDto;
     const query = this.returnlModel.find();
     query.setOptions({ lean: true });
-
-    if (name) {
-      const customer = await this.customerModel.findOne({
-        customerName: { $regex: name, $options: 'i' },
-      });
-      if (!customer) {
-        throw new NotFoundException(
-          `Return form with customer's name: ${name} not found`,
-        );
-      }
-      const customer_id: string = customer._id.toHexString();
-      query.where('customer').equals(customer_id);
-    }
-    if (phoneNumber) {
-      const customer = await this.customerModel.findOne({
-        phoneNumber: { $regex: phoneNumber, $options: 'i' },
-      });
-      if (!customer) {
-        throw new NotFoundException(
-          `Return form with customer's phone number: ${phoneNumber} not found`,
-        );
-      }
-      const customer_id: string = customer._id.toHexString();
-      query.where('customer').equals(customer_id);
-    }
-    const results = await query.exec();
-    if (results.length === 0) {
-      throw new NotFoundException(
-        `Rental Package Registeration cannot be found`,
-      );
-    }
-    return results;
+    query.populate('customer', 'customerName phoneNumber');
+    query.populate('rentedGames.game', 'productName price');
+    return await query.exec();
   }
 
   async getReturnTicketById(id: string): Promise<Return> {
-    const returnTicket = await this.returnlModel.findById(id).exec();
+    const returnTicket = await this.returnlModel
+      .findById(id)
+      .populate('customer', 'customerName phoneNumber')
+      .populate('rentedGames.game', 'productName price')
+      .exec();
     if (!returnTicket) {
       throw new Error(`Return ticket with ${id} not found`);
     }
@@ -157,6 +138,8 @@ export class ReturnService {
   ): Promise<Return> {
     const updated = await this.returnlModel
       .findByIdAndUpdate(id, updateReturnDto, { new: true })
+      .populate('customer', 'customerName phoneNumber')
+      .populate('rentedGames.game', 'productName price')
       .exec();
 
     if (!updated) {

@@ -53,6 +53,7 @@ export class RentalService {
       deposit,
       returnValue: 0,
       returnState: ReturnStateEnum.NOT_RETURNED,
+      returnIDs: [],
     });
     // find games and calculate total price
     const pricePerGame = rentedGames.map(async (rentedGame) => {
