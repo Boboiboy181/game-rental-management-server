@@ -8,6 +8,7 @@ import { CustomerModule } from 'src/customer/customer.module';
 import { ReturnModule } from 'src/return/return.module';
 import { VoucherSchema } from './schemas/voucher.schema';
 import { RentalPackageModule } from '../rental-package/rental-package.module';
+import { AutoCodeModule } from '../auto-code/auto-code.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { RentalPackageModule } from '../rental-package/rental-package.module';
     CustomerModule,
     ReturnModule,
     RentalPackageModule,
+    AutoCodeModule,
   ],
   controllers: [InvoiceController],
   providers: [InvoiceService],

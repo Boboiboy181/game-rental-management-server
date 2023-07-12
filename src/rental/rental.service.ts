@@ -15,6 +15,7 @@ import { ReturnStateEnum } from './enums/return-state.enum';
 import { FilterRentalDto } from './dtos/filter-rental.dto';
 import { PreOrderService } from '../pre-order/pre-order.service';
 import { priceByDays } from 'src/utils/price-by-days';
+import { AutoCodeService } from '../auto-code/auto-code.service';
 
 @Injectable()
 export class RentalService {
@@ -23,6 +24,7 @@ export class RentalService {
     private readonly videoGameService: VideoGameService,
     private readonly customerService: CustomerService,
     private readonly preOrderService: PreOrderService,
+    private readonly autoCodeService: AutoCodeService,
   ) {}
 
   async createRental(createRentalDto: CreateRentalDto): Promise<Rental> {
@@ -46,6 +48,7 @@ export class RentalService {
     });
     // create new rental
     const rental = new this.rentalModel({
+      rentalCode: await this.autoCodeService.generateAutoCode('SE'),
       customer,
       deposit,
       returnValue: 0,

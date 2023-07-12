@@ -7,6 +7,9 @@ export type PreOrderDocument = HydratedDocument<PreOrder>;
 
 @Schema({ timestamps: true })
 export class PreOrder {
+  @Prop({ unique: true })
+  preOrderCode: string;
+
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Customer' })
   customer: Customer;
 

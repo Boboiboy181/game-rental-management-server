@@ -3,13 +3,12 @@ import { HydratedDocument, Schema as MongooseSchema } from 'mongoose';
 import { VideoGame } from '../../video-game/schemas/video-game.schema';
 import { Customer } from '../../customer/schemas/customer.schema';
 import { ReturnStateEnum } from '../enums/return-state.enum';
-import { generateAutoCode } from 'src/utils/generate-auto-code';
 
 export type RentalDocument = HydratedDocument<Rental>;
 
 @Schema({ timestamps: true })
 export class Rental {
-  @Prop({ unique: true, default: generateAutoCode('SE') })
+  @Prop({ unique: true })
   rentalCode: string;
 
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Customer' })

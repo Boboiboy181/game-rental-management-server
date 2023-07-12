@@ -9,6 +9,9 @@ export type InvoiceDocument = HydratedDocument<Invoice>;
 
 @Schema({ timestamps: true })
 export class Invoice {
+  @Prop({ unique: true })
+  invoiceID: string;
+
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Customer' })
   customer: Customer;
 

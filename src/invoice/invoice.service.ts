@@ -11,6 +11,7 @@ import { Voucher } from './schemas/voucher.schema';
 import { UpdateVoucherDto } from './dtos/update-voucher.dto';
 import { createInvoiceDtoVoucherDto } from './dtos/create-voucher.dto';
 import { RentalPackageService } from '../rental-package/rental-package.service';
+import { AutoCodeService } from '../auto-code/auto-code.service';
 
 @Injectable()
 export class InvoiceService {
@@ -20,6 +21,7 @@ export class InvoiceService {
     private readonly customerService: CustomerService,
     private readonly returnService: ReturnService,
     private readonly rentalPackageService: RentalPackageService,
+    private readonly autoCodeService: AutoCodeService,
   ) {}
 
   async addPoint(customerId: string, transactionAmount: number): Promise<void> {
@@ -144,11 +146,14 @@ export class InvoiceService {
     const returnTicket = await this.returnService.getReturnTicketById(
       returnTicketID,
     );
+
     const invoice = new this.invoiceModel({
+      invoiceID: await this.autoCodeService.generateAutoCode('ISE'),
       customer: returnTicket.customer,
       rentedGames: returnTicket.rentedGames,
       return: returnTicket,
     });
+
     await this.returnService.updateReturnTicket(returnTicketID, {
       paymentState: PaymentStateEnum.PAID,
     });

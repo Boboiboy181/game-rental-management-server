@@ -2,13 +2,15 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Schema as MongooseSchema } from 'mongoose';
 import { Customer } from 'src/customer/schemas/customer.schema';
 import { VideoGame } from 'src/video-game/schemas/video-game.schema';
-import { Rental } from 'src/rental/schemas/rental.schema';
 import { PaymentStateEnum } from '../enum/payment-state.enum';
 
 export type ReturnDocument = HydratedDocument<Return>;
 
 @Schema({ timestamps: true })
 export class Return {
+  @Prop({ unique: true })
+  returnCode: string;
+
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Customer' })
   customer: Customer;
 
@@ -39,8 +41,8 @@ export class Return {
   @Prop()
   estimatedPrice: number;
 
-  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Rental' })
-  rental: Rental;
+  @Prop()
+  rentalCode: string;
 
   @Prop()
   paymentState: PaymentStateEnum;

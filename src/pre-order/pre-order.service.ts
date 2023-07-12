@@ -13,6 +13,7 @@ import { CustomerService } from 'src/customer/customer.service';
 import { VideoGameService } from 'src/video-game/video-game.service';
 import { MailerService } from '@nestjs-modules/mailer';
 import { priceByDays } from 'src/utils/price-by-days';
+import { AutoCodeService } from '../auto-code/auto-code.service';
 
 @Injectable()
 export class PreOrderService {
@@ -21,6 +22,7 @@ export class PreOrderService {
     private readonly customerService: CustomerService,
     private readonly videoGameService: VideoGameService,
     private readonly mailerService: MailerService,
+    private readonly autoCodeService: AutoCodeService,
   ) {}
 
   async createPreOrder(
@@ -36,9 +38,14 @@ export class PreOrderService {
       phoneNumber,
     });
 
+    const preOrderCode: string = await this.autoCodeService.generateAutoCode(
+      'PSE',
+    );
+
     // create new pre-order
     const preOrder = new this.preOrderModel({
       customer,
+      preOrderCode,
     });
 
     // find games and calculate total price
@@ -75,11 +82,10 @@ export class PreOrderService {
       );
     });
 
-    const totalPrice = (await Promise.all(totalGamesPrice)).reduce(
+    preOrder.estimatedPrice = (await Promise.all(totalGamesPrice)).reduce(
       (acc, price) => acc + price,
       0,
     );
-    preOrder.estimatedPrice = totalPrice;
 
     const formatDate = (dateString: string) => {
       const date = new Date(dateString);
@@ -94,26 +100,26 @@ export class PreOrderService {
     const emailToSent = customer ? customer.email : email;
 
     // send email
-    await this.mailerService.sendMail({
-      to: emailToSent,
-      subject: 'Pre-order confirmation',
-      template: './pre-order-confirmation',
-      context: {
-        customerName,
-        email: emailToSent,
-        phoneNumber,
-        rentedGames: preOrder.rentedGames.map((game) => {
-          return {
-            name: game.game.productName,
-            quantity: game.preOrderQuantity,
-            price: game.game.price,
-            rentalDays: game.numberOfRentalDays,
-            returnDate: formatDate(game.returnDate.toString()),
-          };
-        }),
-        totalPrice: preOrder.estimatedPrice,
-      },
-    });
+    // await this.mailerService.sendMail({
+    //   to: emailToSent,
+    //   subject: 'Pre-order confirmation',
+    //   template: './pre-order-confirmation',
+    //   context: {
+    //     customerName,
+    //     email: emailToSent,
+    //     phoneNumber,
+    //     rentedGames: preOrder.rentedGames.map((game) => {
+    //       return {
+    //         name: game.game.productName,
+    //         quantity: game.preOrderQuantity,
+    //         price: game.game.price,
+    //         rentalDays: game.numberOfRentalDays,
+    //         returnDate: formatDate(game.returnDate.toString()),
+    //       };
+    //     }),
+    //     totalPrice: preOrder.estimatedPrice,
+    //   },
+    // });
 
     return await preOrder.save();
   }
