@@ -16,21 +16,21 @@ export class CreatePreOrderDto {
   customerID?: string;
 
   @ApiProperty()
-  @IsNotEmpty()
+  @IsOptional()
   @IsEmail()
-  email: string;
+  email?: string;
 
   @ApiProperty()
-  @IsNotEmpty()
+  @IsOptional()
   @IsNumberString()
   @MaxLength(10)
   @MinLength(10)
-  phoneNumber: number;
+  phoneNumber?: number;
 
   @ApiProperty()
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
-  customerName: string;
+  customerName?: string;
 
   @ApiProperty()
   @IsNotEmpty()

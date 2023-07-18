@@ -97,29 +97,27 @@ export class PreOrderService {
       return new Intl.DateTimeFormat('vi-VN', options).format(date);
     };
 
-    const emailToSent = customer ? customer.email : email;
-
     // send email
-    // await this.mailerService.sendMail({
-    //   to: emailToSent,
-    //   subject: 'Pre-order confirmation',
-    //   template: './pre-order-confirmation',
-    //   context: {
-    //     customerName,
-    //     email: emailToSent,
-    //     phoneNumber,
-    //     rentedGames: preOrder.rentedGames.map((game) => {
-    //       return {
-    //         name: game.game.productName,
-    //         quantity: game.preOrderQuantity,
-    //         price: game.game.price,
-    //         rentalDays: game.numberOfRentalDays,
-    //         returnDate: formatDate(game.returnDate.toString()),
-    //       };
-    //     }),
-    //     totalPrice: preOrder.estimatedPrice,
-    //   },
-    // });
+    await this.mailerService.sendMail({
+      to: customer ? customer.email : email,
+      subject: 'Pre-order confirmation',
+      template: './pre-order-confirmation',
+      context: {
+        customerName: customer ? customer.customerName : customerName,
+        email: customer ? customer.email : email,
+        phoneNumber: customer ? customer.phoneNumber : phoneNumber,
+        rentedGames: preOrder.rentedGames.map((game) => {
+          return {
+            name: game.game.productName,
+            quantity: game.preOrderQuantity,
+            price: game.game.price,
+            rentalDays: game.numberOfRentalDays,
+            returnDate: formatDate(game.returnDate.toString()),
+          };
+        }),
+        totalPrice: preOrder.estimatedPrice,
+      },
+    });
 
     return await preOrder.save();
   }
