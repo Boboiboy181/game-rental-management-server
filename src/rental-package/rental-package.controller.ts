@@ -1,11 +1,11 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
+  Controller,
   Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
   Query,
 } from '@nestjs/common';
 import { RentalPackageService } from './rental-package.service';
@@ -14,7 +14,10 @@ import { UpdateRentalPackageDto } from './dtos/update-rental-package.dto';
 import { FilterRentalPackageDto } from './dtos/filter-rental-package.dto';
 import { RegisterRentalPackageDto } from './dtos/register-rental-package.dto';
 import { RentalPackage } from './schemas/rental-package.schema';
-import { RentalPackageRegistration } from './schemas/rental-package-registration.schema';
+import {
+  RentalPackageRegistration,
+  RentalPackageRegistrationDocument,
+} from './schemas/rental-package-registration.schema';
 import {
   ApiCreatedResponse,
   ApiOkResponse,
@@ -34,6 +37,13 @@ export class RentalPackageController {
     return this.rentalPackageService.createRentalPackage(
       createRentalPackageDto,
     );
+  }
+
+  @Get('registration-list/:id')
+  getRegistrationByCustomerID(
+    @Param('id') id: string,
+  ): Promise<RentalPackageRegistrationDocument[]> {
+    return this.rentalPackageService.getRegistrationByCustomerID(id);
   }
 
   @Get('/registration-list')

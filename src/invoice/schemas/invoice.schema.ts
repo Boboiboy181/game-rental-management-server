@@ -36,8 +36,8 @@ export class Invoice {
     },
   ];
 
-  @Prop([{ type: MongooseSchema.Types.ObjectId, ref: 'Voucher' }])
-  voucher: Voucher[];
+  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Voucher' })
+  voucher: Voucher;
 
   @Prop()
   fine: number;

@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Schema as MongooseSchema } from 'mongoose';
-import { Customer } from 'src/customer/schemas/customer.schema';
+import { CustomerDocument } from 'src/customer/schemas/customer.schema';
 import { VideoGame } from 'src/video-game/schemas/video-game.schema';
 import { PaymentStateEnum } from '../enum/payment-state.enum';
 
@@ -12,7 +12,7 @@ export class Return {
   returnCode: string;
 
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Customer' })
-  customer: Customer;
+  customer: CustomerDocument;
 
   @Prop([
     {
