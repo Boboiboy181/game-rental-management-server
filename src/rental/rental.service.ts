@@ -16,6 +16,8 @@ import { FilterRentalDto } from './dtos/filter-rental.dto';
 import { PreOrderService } from '../pre-order/pre-order.service';
 import { priceByDays } from 'src/utils/price-by-days';
 import { AutoCodeService } from '../auto-code/auto-code.service';
+import { MailerService } from '@nestjs-modules/mailer';
+import { formatDate } from 'src/utils/format-date';
 
 @Injectable()
 export class RentalService {
@@ -25,11 +27,13 @@ export class RentalService {
     private readonly customerService: CustomerService,
     private readonly preOrderService: PreOrderService,
     private readonly autoCodeService: AutoCodeService,
+    private readonly mailerService: MailerService,
   ) {}
 
   async createRental(createRentalDto: CreateRentalDto): Promise<Rental> {
     const {
       customerID,
+      email,
       phoneNumber,
       customerName,
       rentedGames,
@@ -43,6 +47,7 @@ export class RentalService {
 
     // find customer
     const customer = await this.customerService.getCustomerById(customerID, {
+      email,
       customerName,
       phoneNumber,
     });
@@ -103,7 +108,41 @@ export class RentalService {
       0,
     );
 
-    return await rental.save();
+    const formatDate = (dateString: string) => {
+      const date = new Date(dateString);
+      const options: Intl.DateTimeFormatOptions = {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+      };
+      return new Intl.DateTimeFormat('vi-VN', options).format(date);
+    };
+
+    const rentalDocument = await rental.save();
+
+    await this.mailerService.sendMail({
+      to: rentalDocument.customer.email,
+      subject: 'Rental confirmation',
+      template: './rental-confirmation',
+      context: {
+        rentalCode: rentalDocument.rentalCode,
+        customerName: rentalDocument.customer.customerName,
+        email: rentalDocument.customer.email,
+        phoneNumber: rentalDocument.customer.phoneNumber,
+        rentedGames: rentalDocument.rentedGames.map((game) => {
+          return {
+            name: game.game.productName,
+            quantity: game.preOrderQuantity,
+            price: game.game.price,
+            rentalDays: game.numberOfRentalDays,
+            returnDate: formatDate(game.returnDate.toString()),
+          };
+        }),
+        totalPrice: rentalDocument.estimatedPrice,
+      },
+    });
+
+    return rentalDocument;
   }
 
   async createRentalFromPreOrder(preOrderID: string): Promise<Rental> {
@@ -141,6 +180,7 @@ export class RentalService {
       .populate('customer', 'customerName phoneNumber')
       .populate('rentedGames.game', 'productName price')
       .exec();
+
     if (!result) {
       throw new NotFoundException(`Rental with id ${id} not found`);
     }

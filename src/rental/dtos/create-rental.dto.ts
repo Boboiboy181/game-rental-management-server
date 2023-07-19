@@ -5,6 +5,7 @@ import {
   IsString,
   MaxLength,
   MinLength,
+  IsEmail,
 } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
@@ -26,6 +27,11 @@ export class CreateRentalDto {
   @MaxLength(10)
   @MinLength(10)
   phoneNumber?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsEmail()
+  email?: string;
 
   @ApiPropertyOptional()
   @IsOptional()
