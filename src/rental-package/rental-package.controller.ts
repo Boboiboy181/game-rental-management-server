@@ -57,6 +57,12 @@ export class RentalPackageController {
     );
   }
 
+  @Delete('/registration-list/:id')
+  @ApiResponse({ status: 204, description: 'Delete success' })
+  async deleteRegisterRentalPackage(@Param('id') id: string): Promise<void> {
+    await this.rentalPackageService.deleteRegistrationByID(id);
+  }
+
   @Get()
   @ApiOkResponse({ type: [RentalPackage] })
   getRentalPackages(@Query() filterRentalPackageDto: FilterRentalPackageDto) {

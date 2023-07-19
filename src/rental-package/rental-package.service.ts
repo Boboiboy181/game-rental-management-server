@@ -110,6 +110,20 @@ export class RentalPackageService {
     return await query.exec();
   }
 
+  async deleteRegistrationByID(registrationID: string): Promise<void> {
+    const result = await this.rentalPackageRegistrationModel
+      .findById(registrationID)
+      .exec();
+    if (!result) {
+      throw new NotFoundException(
+        `Rental Package Registration with id ${registrationID} not found`,
+      );
+    }
+    await this.rentalPackageRegistrationModel.deleteOne({
+      _id: registrationID,
+    });
+  }
+
   async updateRegistration(
     register: RentalPackageRegistrationDocument,
     updateRegisterRentalPackage: UpdateRegisterRentalPackageDto,
@@ -172,7 +186,9 @@ export class RentalPackageService {
       query.where('customer').equals(customer_id);
     }
 
-    const results = await query.exec();
+    query.sort({ createdAt: -1 });
+
+    const results = await query.populate('customer', 'customerName').exec();
     if (results.length === 0) {
       throw new NotFoundException(
         `Rental Package Registeration cannot be found`,
