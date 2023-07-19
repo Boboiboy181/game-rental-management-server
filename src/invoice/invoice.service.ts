@@ -3,7 +3,7 @@ import { CreateInvoiceDto } from './dtos/create-invoice.dto';
 import { UpdateInvoiceDto } from './dtos/update-invoice.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Invoice } from './schemas/invoice.schema';
+import { Invoice, InvoiceDocument } from './schemas/invoice.schema';
 import { ReturnService } from 'src/return/return.service';
 import { PaymentStateEnum } from 'src/return/enum/payment-state.enum';
 import { CustomerService } from '../customer/customer.service';
@@ -12,6 +12,8 @@ import { UpdateVoucherDto } from './dtos/update-voucher.dto';
 import { createInvoiceDtoVoucherDto } from './dtos/create-voucher.dto';
 import { RentalPackageService } from '../rental-package/rental-package.service';
 import { AutoCodeService } from '../auto-code/auto-code.service';
+import { MailerService } from '@nestjs-modules/mailer';
+import { formatDate } from 'src/utils/format-date';
 
 @Injectable()
 export class InvoiceService {
@@ -22,6 +24,7 @@ export class InvoiceService {
     private readonly returnService: ReturnService,
     private readonly rentalPackageService: RentalPackageService,
     private readonly autoCodeService: AutoCodeService,
+    private readonly mailerService: MailerService,
   ) {}
 
   async addPoint(customerId: string, transactionAmount: number): Promise<void> {
@@ -182,7 +185,34 @@ export class InvoiceService {
       returnTicket.customer._id.toString(),
       returnTicket.estimatedPrice,
     );
-    return await invoice.save();
+
+    const invoiceDocument: InvoiceDocument = await invoice.save();
+
+    console.log(invoiceDocument);
+
+    await this.mailerService.sendMail({
+      to: invoiceDocument.customer.email,
+      subject: 'Receipt',
+      template: './invoice-checked',
+      context: {
+        invoiceID: invoiceDocument.invoiceID,
+        customerName: invoiceDocument.customer.customerName,
+        email: invoiceDocument.customer.email,
+        phoneNumber: invoice.customer.phoneNumber,
+        rentedGames: invoice.rentedGames.map((game) => {
+          return {
+            name: game.game.productName,
+            quantity: game.preOrderQuantity,
+            price: game.game.price,
+            rentalDays: game.numberOfRentalDays,
+            returnDate: formatDate(game.returnDate.toString()),
+          };
+        }),
+        totalPrice: invoiceDocument.finalPrice,
+      },
+    });
+
+    return invoiceDocument;
   }
 
   async getInvoice(): Promise<Invoice[]> {
@@ -200,9 +230,10 @@ export class InvoiceService {
   async getInvoiceByID(id: string): Promise<Invoice> {
     const result = await this.invoiceModel
       .findById(id)
-      .populate('customer', 'customerName phoneNumber point')
+      .populate('customer', 'customerName email phoneNumber')
       .populate('rentedGames.game', 'productName price')
       .exec();
+
     if (!result) {
       throw new NotFoundException(`Could not find invoice with ${id}`);
     }

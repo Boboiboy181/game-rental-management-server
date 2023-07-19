@@ -1,0 +1,66 @@
+<html>
+  <head>
+    <meta charset='UTF-8' />
+    <title>Hóa Đơn</title>
+    <style>
+      body { font-family: Arial, sans-serif; margin: 0; padding: 20px;
+      background-color: #f2f2f2; } .container { max-width: 800px; margin: 0
+      auto; background-color: #fff; padding: 30px; border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); } h1 { text-align: center;
+      margin-bottom: 30px; color: #3366cc; font-size: 2rem; text-transform:
+      uppercase; } h2 { margin-bottom: 10px; font-size: 1.5rem; color: #333; }
+      table { width: 100%; border-collapse: collapse; margin-top: 20px; } th, td
+      { padding: 10px; text-align: left; border-bottom: 1px solid #ccc; } th {
+      background-color: #f0f0f0; font-weight: bold; color: #333; } p { color:
+      #555; line-height: 1.5; } .total-price { color: red; }
+    </style>
+  </head>
+  <body>
+    <div class='container'>
+      <h1>Hóa Đơn</h1>
+
+      <div>
+        <h2>Mã Hóa Đơn: #{{invoiceID}}</h2> 
+        <h2>Thông Tin Khách Hàng</h2>
+        <p><strong>Email:</strong> {{email}}</p>
+        <p><strong>Số Điện Thoại:</strong> {{phoneNumber}}</p>
+        <p><strong>Tên Khách Hàng:</strong> {{customerName}}</p>
+      </div>
+
+      <div>
+        <h2>Chi Tiết Hóa Đơn</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Tên Game</th>
+              <th>Số Lượng Đặt Hàng</th>
+              <th>Giá</th>
+              <th>Số Ngày Thuê</th>
+              <th>Ngày Trả Hàng</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{#each rentedGames}}
+              <tr>
+                <td>{{name}}</td>
+                <td>{{quantity}}</td>
+                <td>{{price}} đ</td>
+                <td>{{rentalDays}}</td>
+                <td>{{returnDate}}</td>
+              </tr>
+            {{/each}}
+          </tbody>
+        </table>
+      </div>
+
+      <div>
+        <p class='total-price'><strong>Tổng Tiền:</strong> {{totalPrice}} đ</p>
+        <p>Cảm ơn bạn đã tin tưởng và thuê game tại cửa hàng. Hẹn gặp lại bạn ở những lần sau</p>
+        <p>Nếu bạn cần hỗ trợ hoặc có thêm câu hỏi, xin vui lòng liên hệ với
+          với cửa hàng thông qua địa chỉ <a href="">f4store@gmail.com</a> .</p>
+        <p>Trân trọng, F4 Store</p>
+      </div>
+
+    </div>
+  </body>
+</html>
