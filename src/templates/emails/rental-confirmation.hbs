@@ -1,42 +1,82 @@
+<!DOCTYPE html>
 <html>
   <head>
     <meta charset='UTF-8' />
-    <title>Rental Confirmation</title>
+    <title>Hóa Đơn</title>
     <style>
-      body { font-family: Arial, sans-serif; margin: 0; padding: 20px;
-      background-color: #f2f2f2; } h1 { text-align: center; margin-bottom: 30px;
-      color: #3366cc; font-size: 2rem; text-transform: uppercase; } h2 {
-      margin-bottom: 10px; font-size: 1.5rem; color: #333; } table { width:
-      100%; border-collapse: collapse; margin-top: 20px; } th, td { padding:
-      10px; text-align: left; border-bottom: 1px solid #ccc; } th {
-      background-color: #f0f0f0; font-weight: bold; color: #333; } p { color:
-      #555; line-height: 1.5; } .container { max-width: 800px; margin: 0 auto;
-      background-color: #fff; padding: 30px; border-radius: 8px; box-shadow: 0
-      2px 4px rgba(0, 0, 0, 0.1); } .total-price { color: red; }
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 20px;
+        background-color: #f2f2f2;
+      }
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+        background-color: #fff;
+        padding: 30px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      h1 {
+        text-align: center;
+        margin-bottom: 30px;
+        color: #3366cc;
+        font-size: 2rem;
+        text-transform: uppercase;
+      }
+      h2 {
+        margin-bottom: 10px;
+        font-size: 1.5rem;
+        color: #333;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+      }
+      th,
+      td {
+        padding: 10px;
+        text-align: left;
+        border-bottom: 1px solid #ccc;
+      }
+      th {
+        background-color: #f0f0f0;
+        font-weight: bold;
+        color: #333;
+      }
+      p {
+        color: #555;
+        line-height: 1.5;
+      }
+      .total-price {
+        color: red;
+      }
     </style>
   </head>
   <body>
     <div class='container'>
-
-      <h1>Rental Ticket</h1>
+      <h1>Phiếu thuê</h1>
 
       <div>
-        <h2>Customer Information</h2>
+        <h2>Thông Tin Khách Hàng</h2>
         <p><strong>Email:</strong> {{email}}</p>
-        <p><strong>Phone Number:</strong> {{phoneNumber}}</p>
-        <p><strong>Customer Name:</strong> {{customerName}}</p>
+        <p><strong>Số Điện Thoại:</strong> {{phoneNumber}}</p>
+        <p><strong>Tên Khách Hàng:</strong> {{customerName}}</p>
       </div>
 
       <div>
-        <h2>Rented video game details</h2>
+        <h2>Mã Phiếu Thuê: #{{rentalCode}}</h2> 
+        <h2>Chi Tiết Đặt Hàng</h2>
         <table>
           <thead>
             <tr>
-              <th>Game</th>
-              <th>Rental Quantity</th>
-              <th>Number of Rental Days</th>
-              <th>Return date</th>
-              <th>Price</th>
+              <th>Tên Game</th>
+              <th>Số Lượng Đặt Hàng</th>
+              <th>Giá</th>
+              <th>Số Ngày Thuê</th>
+              <th>Ngày Trả Hàng</th>
             </tr>
           </thead>
           <tbody>
@@ -44,6 +84,7 @@
               <tr>
                 <td>{{name}}</td>
                 <td>{{quantity}}</td>
+                <td>{{price}} đ</td>
                 <td>{{rentalDays}}</td>
                 <td>{{returnDate}}</td>
               </tr>
@@ -53,13 +94,11 @@
       </div>
 
       <div>
-        <p class='total-price'><strong>Total price:</strong> {{totalPrice}}</p>
-        <p>Thank you for your rent. We will contact you when there are any
-          issues</p>
-        <p>Please note that, your rental will expires within {{rentalDays}}</p>
-        <p>Best regards, F4 Store</p>
+        <p class='total-price'><strong>Tổng Tiền:</strong> {{totalPrice}} đ</p>
+        <p>Cảm ơn bạn đã thuê game tại cửa hàng</p>
+        <p>Nếu bạn cần hỗ trợ hoặc có thêm câu hỏi, xin vui lòng liên hệ với chúng tôi.</p>
+        <p>Trân trọng, F4 Store</p>
       </div>
-
     </div>
   </body>
 </html>

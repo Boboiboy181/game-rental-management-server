@@ -17,6 +17,7 @@ import { PreOrderService } from '../pre-order/pre-order.service';
 import { priceByDays } from 'src/utils/price-by-days';
 import { AutoCodeService } from '../auto-code/auto-code.service';
 import { MailerService } from '@nestjs-modules/mailer';
+import { formatDate } from 'src/utils/format-date';
 
 @Injectable()
 export class RentalService {
@@ -117,15 +118,18 @@ export class RentalService {
       return new Intl.DateTimeFormat('vi-VN', options).format(date);
     };
 
+    const rentalDocument = await rental.save();
+
     await this.mailerService.sendMail({
-      to: customer ? customer.email : email,
+      to: rentalDocument.customer.email,
       subject: 'Rental confirmation',
       template: './rental-confirmation',
       context: {
-        customerName: customer ? customer.customerName : customerName,
-        email: customer ? customer.email : email,
-        phoneNumber: customer ? customer.phoneNumber : phoneNumber,
-        rentedGames: rental.rentedGames.map((game) => {
+        rentalCode: rentalDocument.rentalCode,
+        customerName: rentalDocument.customer.customerName,
+        email: rentalDocument.customer.email,
+        phoneNumber: rentalDocument.customer.phoneNumber,
+        rentedGames: rentalDocument.rentedGames.map((game) => {
           return {
             name: game.game.productName,
             quantity: game.preOrderQuantity,
@@ -134,11 +138,11 @@ export class RentalService {
             returnDate: formatDate(game.returnDate.toString()),
           };
         }),
-        totalPrice: rental.estimatedPrice,
+        totalPrice: rentalDocument.estimatedPrice,
       },
     });
 
-    return await rental.save();
+    return rentalDocument;
   }
 
   async createRentalFromPreOrder(preOrderID: string): Promise<Rental> {
@@ -176,6 +180,7 @@ export class RentalService {
       .populate('customer', 'customerName phoneNumber')
       .populate('rentedGames.game', 'productName price')
       .exec();
+
     if (!result) {
       throw new NotFoundException(`Rental with id ${id} not found`);
     }

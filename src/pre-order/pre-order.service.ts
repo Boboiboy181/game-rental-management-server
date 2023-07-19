@@ -134,7 +134,7 @@ export class PreOrderService {
   async getPreOrderById(id: string): Promise<PreOrder> {
     return await this.preOrderModel
       .findById(id)
-      .populate('customer')
+      .populate('customer', 'customerName email phoneNumber')
       .populate('rentedGames.game')
       .exec();
   }
