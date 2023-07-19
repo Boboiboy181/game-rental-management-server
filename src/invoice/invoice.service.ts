@@ -3,7 +3,7 @@ import { CreateInvoiceDto } from './dtos/create-invoice.dto';
 import { UpdateInvoiceDto } from './dtos/update-invoice.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Invoice } from './schemas/invoice.schema';
+import { Invoice, InvoiceDocument } from './schemas/invoice.schema';
 import { ReturnService } from 'src/return/return.service';
 import { PaymentStateEnum } from 'src/return/enum/payment-state.enum';
 import { CustomerService } from '../customer/customer.service';
@@ -12,6 +12,8 @@ import { UpdateVoucherDto } from './dtos/update-voucher.dto';
 import { createInvoiceDtoVoucherDto } from './dtos/create-voucher.dto';
 import { RentalPackageService } from '../rental-package/rental-package.service';
 import { AutoCodeService } from '../auto-code/auto-code.service';
+import { MailerService } from '@nestjs-modules/mailer';
+import { formatDate } from 'src/utils/format-date';
 
 @Injectable()
 export class InvoiceService {
@@ -22,6 +24,7 @@ export class InvoiceService {
     private readonly returnService: ReturnService,
     private readonly rentalPackageService: RentalPackageService,
     private readonly autoCodeService: AutoCodeService,
+    private readonly mailerService: MailerService,
   ) {}
 
   async addPoint(customerId: string, transactionAmount: number): Promise<void> {
@@ -30,36 +33,29 @@ export class InvoiceService {
       throw new Error('Customer with id ${id} not found');
     }
     // Logic cộng điểm tích lũy
-    const pointsEarned = Math.floor(transactionAmount / 10000); // Ví dụ: Mỗi 10,000 VNĐ giao dịch tích 1 điểm
+    const pointsEarned = Math.floor(transactionAmount / 50000); // Ví dụ: Mỗi 10,000 VNĐ giao dịch tích 5 điểm
 
     await this.customerService.updateCustomer(customerId, {
       point: customer.point + pointsEarned,
     });
   }
 
-  async subtractPoint(
-    customerId: string,
-    voucherCodes: string[],
-  ): Promise<void> {
+  async subtractPoint(customerId: string, voucherCode: string): Promise<void> {
     const customer = await this.customerService.getCustomerById(customerId);
     if (!customer) {
       throw new Error('Customer with id ${id} not found');
     }
-    const totalVoucherPoint = await voucherCodes.reduce(
-      async (acc: Promise<number>, voucherCode: string) => {
-        const voucher = await this.getVoucherByCode(voucherCode);
-        const voucherPoint = voucher.pointRequired;
-        const previousValue = await acc;
-        return previousValue + voucherPoint;
-      },
-      Promise.resolve(0),
-    );
+    const voucher = await this.getVoucherByCode(voucherCode);
+    if (!voucher) {
+      throw new Error('Voucher with code ${voucherCode} not found');
+    }
+    const voucherPoint = voucher.pointRequired;
     // Logic trừ điểm tích lũy
-    if (customer.point < totalVoucherPoint) {
+    if (customer.point < voucherPoint) {
       throw new Error(`Insufficient points for voucher redemption`);
     }
     await this.customerService.updateCustomer(customerId, {
-      point: customer.point - totalVoucherPoint,
+      point: customer.point - voucherPoint,
     });
   }
 
@@ -142,7 +138,7 @@ export class InvoiceService {
   }
 
   async createInvoice(createInvoiceDto: CreateInvoiceDto): Promise<Invoice> {
-    const { returnTicketID, voucherCodes } = createInvoiceDto;
+    const { returnTicketID, voucherCode } = createInvoiceDto;
     const returnTicket = await this.returnService.getReturnTicketById(
       returnTicketID,
     );
@@ -158,25 +154,23 @@ export class InvoiceService {
       paymentState: PaymentStateEnum.PAID,
     });
 
-    if (voucherCodes) {
-      const totalVoucherValue = await voucherCodes.reduce(
-        async (acc: Promise<number>, voucherCode: string) => {
-          const voucher = await this.getVoucherByCode(voucherCode);
-          invoice.voucher.push(voucher);
-          const voucherValue = voucher.voucherValue;
-          const previousValue = await acc;
-          return previousValue + voucherValue;
-        },
-        Promise.resolve(0),
-      );
+    if (voucherCode) {
+      const voucher = await this.getVoucherByCode(voucherCode);
+
+      invoice.voucher = voucher;
+
+      const voucherValue = voucher.voucherValue;
       // subtract point from customer
-      await this.subtractPoint(returnTicket.customer.toString(), voucherCodes);
+      await this.subtractPoint(
+        returnTicket.customer._id.toString(),
+        voucherCode,
+      );
       // price with voucher
       invoice.finalPrice =
-        returnTicket.estimatedPrice * (1 - totalVoucherValue * 0.01);
+        returnTicket.estimatedPrice * (1 - voucherValue * 0.01);
     } else if (
       await this.checkRegisterRentalPackage(
-        returnTicket.customer.toString(),
+        returnTicket.customer._id.toString(),
         returnTicket.rentedGames,
         new Date(),
       )
@@ -188,14 +182,45 @@ export class InvoiceService {
 
     // adding point to customer
     await this.addPoint(
-      returnTicket.customer.toString(),
+      returnTicket.customer._id.toString(),
       returnTicket.estimatedPrice,
     );
-    return await invoice.save();
+
+    const invoiceDocument: InvoiceDocument = await invoice.save();
+
+    console.log(invoiceDocument);
+
+    await this.mailerService.sendMail({
+      to: invoiceDocument.customer.email,
+      subject: 'Receipt',
+      template: './invoice-checked',
+      context: {
+        invoiceID: invoiceDocument.invoiceID,
+        customerName: invoiceDocument.customer.customerName,
+        email: invoiceDocument.customer.email,
+        phoneNumber: invoice.customer.phoneNumber,
+        rentedGames: invoice.rentedGames.map((game) => {
+          return {
+            name: game.game.productName,
+            quantity: game.preOrderQuantity,
+            price: game.game.price,
+            rentalDays: game.numberOfRentalDays,
+            returnDate: formatDate(game.returnDate.toString()),
+          };
+        }),
+        totalPrice: invoiceDocument.finalPrice,
+      },
+    });
+
+    return invoiceDocument;
   }
 
   async getInvoice(): Promise<Invoice[]> {
-    const result = await this.invoiceModel.find().exec();
+    const result = await this.invoiceModel
+      .find()
+      .populate('customer', 'customerName phoneNumber point')
+      .populate('rentedGames.game', 'productName price')
+      .exec();
     if (!result) {
       throw new NotFoundException(`Could not find invoice `);
     }
@@ -203,7 +228,12 @@ export class InvoiceService {
   }
 
   async getInvoiceByID(id: string): Promise<Invoice> {
-    const result = await this.invoiceModel.findById(id).exec();
+    const result = await this.invoiceModel
+      .findById(id)
+      .populate('customer', 'customerName email phoneNumber')
+      .populate('rentedGames.game', 'productName price')
+      .exec();
+
     if (!result) {
       throw new NotFoundException(`Could not find invoice with ${id}`);
     }

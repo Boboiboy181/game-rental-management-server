@@ -98,11 +98,10 @@ export class RentalService {
       );
     });
 
-    const totalPrice = (await Promise.all(pricePerGame)).reduce(
+    rental.estimatedPrice = (await Promise.all(pricePerGame)).reduce(
       (acc, price) => acc + price,
       0,
     );
-    rental.estimatedPrice = totalPrice;
 
     return await rental.save();
   }
@@ -110,6 +109,7 @@ export class RentalService {
   async createRentalFromPreOrder(preOrderID: string): Promise<Rental> {
     const preOrder = await this.preOrderService.getPreOrderById(preOrderID);
     const rental = new this.rentalModel({
+      rentalCode: await this.autoCodeService.generateAutoCode('SE'),
       customer: preOrder.customer,
       rentedGames: preOrder.rentedGames,
       estimatedPrice: preOrder.estimatedPrice,
@@ -165,6 +165,7 @@ export class RentalService {
 
   async deleteRental(id: string): Promise<void> {
     const result = await this.getRentalById(id);
+
     if (!result) {
       throw new NotFoundException(`Rental with id ${id} not found`);
     }

@@ -123,7 +123,7 @@ export class ReturnService {
   async getReturnTicketById(id: string): Promise<Return> {
     const returnTicket = await this.returnlModel
       .findById(id)
-      .populate('customer', 'customerName phoneNumber')
+      .populate('customer', 'customerName email phoneNumber point')
       .populate('rentedGames.game', 'productName price')
       .exec();
     if (!returnTicket) {
