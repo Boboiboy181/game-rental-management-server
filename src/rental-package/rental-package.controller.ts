@@ -1,11 +1,11 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
+  Controller,
   Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
   Query,
 } from '@nestjs/common';
 import { RentalPackageService } from './rental-package.service';
@@ -45,6 +45,12 @@ export class RentalPackageController {
     return this.rentalPackageService.getRegisterRentalPackage(
       filterRegisterRentalPackageListDto,
     );
+  }
+
+  @Delete('/registration-list/:id')
+  @ApiResponse({ status: 204, description: 'Delete success' })
+  async deleteRegisterRentalPackage(@Param('id') id: string): Promise<void> {
+    await this.rentalPackageService.deleteRegistrationByID(id);
   }
 
   @Get()
