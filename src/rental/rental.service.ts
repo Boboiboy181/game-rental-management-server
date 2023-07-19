@@ -16,6 +16,7 @@ import { FilterRentalDto } from './dtos/filter-rental.dto';
 import { PreOrderService } from '../pre-order/pre-order.service';
 import { priceByDays } from 'src/utils/price-by-days';
 import { AutoCodeService } from '../auto-code/auto-code.service';
+import { MailerService } from '@nestjs-modules/mailer';
 
 @Injectable()
 export class RentalService {
@@ -25,11 +26,13 @@ export class RentalService {
     private readonly customerService: CustomerService,
     private readonly preOrderService: PreOrderService,
     private readonly autoCodeService: AutoCodeService,
+    private readonly mailerService: MailerService,
   ) {}
 
   async createRental(createRentalDto: CreateRentalDto): Promise<Rental> {
     const {
       customerID,
+      email,
       phoneNumber,
       customerName,
       rentedGames,
@@ -43,6 +46,7 @@ export class RentalService {
 
     // find customer
     const customer = await this.customerService.getCustomerById(customerID, {
+      email,
       customerName,
       phoneNumber,
     });
@@ -102,6 +106,37 @@ export class RentalService {
       (acc, price) => acc + price,
       0,
     );
+
+    const formatDate = (dateString: string) => {
+      const date = new Date(dateString);
+      const options: Intl.DateTimeFormatOptions = {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+      };
+      return new Intl.DateTimeFormat('vi-VN', options).format(date);
+    };
+
+    await this.mailerService.sendMail({
+      to: customer ? customer.email : email,
+      subject: 'Rental confirmation',
+      template: './rental-confirmation',
+      context: {
+        customerName: customer ? customer.customerName : customerName,
+        email: customer ? customer.email : email,
+        phoneNumber: customer ? customer.phoneNumber : phoneNumber,
+        rentedGames: rental.rentedGames.map((game) => {
+          return {
+            name: game.game.productName,
+            quantity: game.preOrderQuantity,
+            price: game.game.price,
+            rentalDays: game.numberOfRentalDays,
+            returnDate: formatDate(game.returnDate.toString()),
+          };
+        }),
+        totalPrice: rental.estimatedPrice,
+      },
+    });
 
     return await rental.save();
   }
