@@ -53,10 +53,45 @@ export class VideoGameService {
     return await query.exec();
   }
 
+  async checkVideoGameReferenced(
+    id: string,
+    modelNames: string[],
+  ): Promise<boolean> {
+    const checkPromises = modelNames.map(async (modelName) => {
+      const model = this.videoGameModel.db.models[modelName];
+      if (!model) {
+        throw new Error(`Model with name '${modelName}' not found.`);
+      }
+      // Use $elemMatch to match the elements in the rentedGames array
+      return model
+        .countDocuments({ rentedGames: { $elemMatch: { game: id } } })
+        .exec();
+    });
+
+    const counts = await Promise.all(checkPromises);
+    return counts.some((count) => count > 0);
+  }
+
   async deleteVideoGame(id: string): Promise<void> {
+    // Check if the customer is referenced in other models
+    const isReferenced = await this.checkVideoGameReferenced(id, [
+      'PreOrder',
+      'Rental',
+      'Return',
+      'Invoice',
+    ]);
+
+    if (isReferenced) {
+      // Handle the scenario where the customer is referenced in other models
+      throw new NotFoundException(
+        `Cannot delete video game with id ${id} because it is referenced in other models.`,
+      );
+    }
+
+    // If the customer is not referenced, proceed with deleting the customer
     const result = await this.getVideoGameById(id);
     if (!result) {
-      throw new NotFoundException(`Video game with id ${id} not found`);
+      throw new NotFoundException(`Customer with id ${id} not found`);
     }
     await this.videoGameModel.deleteOne({ _id: id }).exec();
   }

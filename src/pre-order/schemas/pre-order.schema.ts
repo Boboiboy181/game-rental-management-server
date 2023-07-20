@@ -1,6 +1,9 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Schema as MongooseSchema } from 'mongoose';
-import { VideoGame } from 'src/video-game/schemas/video-game.schema';
+import {
+  VideoGame,
+  VideoGameDocument,
+} from 'src/video-game/schemas/video-game.schema';
 import { Customer } from 'src/customer/schemas/customer.schema';
 
 export type PreOrderDocument = HydratedDocument<PreOrder>;
@@ -23,7 +26,7 @@ export class PreOrder {
   ])
   rentedGames: [
     {
-      game: VideoGame;
+      game: VideoGameDocument;
       preOrderQuantity: number;
       numberOfRentalDays: number;
       returnDate: Date;
