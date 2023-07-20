@@ -13,7 +13,7 @@ import { createInvoiceDtoVoucherDto } from './dtos/create-voucher.dto';
 import { RentalPackageService } from '../rental-package/rental-package.service';
 import { AutoCodeService } from '../auto-code/auto-code.service';
 import { MailerService } from '@nestjs-modules/mailer';
-import { formatDate } from 'src/utils/format-date';
+import { formatDate } from '../utils/format-date';
 
 @Injectable()
 export class InvoiceService {
@@ -198,8 +198,8 @@ export class InvoiceService {
         invoiceID: invoiceDocument.invoiceID,
         customerName: invoiceDocument.customer.customerName,
         email: invoiceDocument.customer.email,
-        phoneNumber: invoice.customer.phoneNumber,
-        rentedGames: invoice.rentedGames.map((game) => {
+        phoneNumber: invoiceDocument.customer.phoneNumber,
+        rentedGames: returnTicket.rentedGames.map((game) => {
           return {
             name: game.game.productName,
             quantity: game.preOrderQuantity,

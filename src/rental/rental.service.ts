@@ -7,7 +7,7 @@ import { CreateRentalDto } from './dtos/create-rental.dto';
 import { UpdateRentalDto } from './dtos/update-rental.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Rental } from './schemas/rental.schema';
+import { Rental, RentalDocument } from './schemas/rental.schema';
 import { RentalDaysEnum } from '../pre-order/enums/rental-days.enum';
 import { VideoGameService } from '../video-game/video-game.service';
 import { CustomerService } from '../customer/customer.service';
@@ -17,7 +17,7 @@ import { PreOrderService } from '../pre-order/pre-order.service';
 import { priceByDays } from 'src/utils/price-by-days';
 import { AutoCodeService } from '../auto-code/auto-code.service';
 import { MailerService } from '@nestjs-modules/mailer';
-import { formatDate } from 'src/utils/format-date';
+import { VideoGameDocument } from '../video-game/schemas/video-game.schema';
 
 @Injectable()
 export class RentalService {
@@ -64,7 +64,8 @@ export class RentalService {
     const pricePerGame = rentedGames.map(async (rentedGame) => {
       const { gameID, preOrderQuantity, numberOfRentalDays } = rentedGame;
       // find game
-      const videoGame = await this.videoGameService.getVideoGameById(gameID);
+      const videoGame: VideoGameDocument =
+        await this.videoGameService.getVideoGameById(gameID);
 
       const returnDate = new Date(Date.now());
       returnDate.setDate(
@@ -118,7 +119,7 @@ export class RentalService {
       return new Intl.DateTimeFormat('vi-VN', options).format(date);
     };
 
-    const rentalDocument = await rental.save();
+    const rentalDocument: RentalDocument = await rental.save();
 
     await this.mailerService.sendMail({
       to: rentalDocument.customer.email,
@@ -171,6 +172,7 @@ export class RentalService {
     if (phoneNumber) {
       query.where({ phoneNumber: { $regex: phoneNumber, $options: 'i' } });
     }
+    query.sort({ createdAt: -1 });
     return await query.exec();
   }
 
@@ -209,6 +211,26 @@ export class RentalService {
     if (!result) {
       throw new NotFoundException(`Rental with id ${id} not found`);
     }
+
+    const rentedGames = result.rentedGames.map((rentedGame) => {
+      return {
+        gameID: rentedGame.game._id,
+        quantity: rentedGame.preOrderQuantity,
+      };
+    });
+
+    const updatePromises = rentedGames.map(async (rentedGame) => {
+      const gameID = rentedGame.gameID.toString();
+      const videoGame: VideoGameDocument =
+        await this.videoGameService.getVideoGameById(gameID);
+      const newQuantity = videoGame.quantity + rentedGame.quantity;
+      await this.videoGameService.updateProduct(gameID, {
+        quantity: newQuantity,
+      });
+    });
+
+    await Promise.all(updatePromises);
+
     await this.rentalModel.deleteOne({ _id: id }).exec();
   }
 }

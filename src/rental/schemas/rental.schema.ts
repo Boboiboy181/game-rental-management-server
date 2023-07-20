@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Schema as MongooseSchema } from 'mongoose';
-import { VideoGame } from '../../video-game/schemas/video-game.schema';
+import { VideoGameDocument } from '../../video-game/schemas/video-game.schema';
 import { Customer } from '../../customer/schemas/customer.schema';
 import { ReturnStateEnum } from '../enums/return-state.enum';
 
@@ -24,7 +24,7 @@ export class Rental {
   ])
   rentedGames: [
     {
-      game: VideoGame;
+      game: VideoGameDocument;
       preOrderQuantity: number;
       numberOfRentalDays: number;
       returnDate: Date;

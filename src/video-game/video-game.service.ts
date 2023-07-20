@@ -3,7 +3,7 @@ import { CreateVideoGameDto } from './dtos/create-video-game.dto';
 import { UpdateVideoGameDto } from './dtos/update-video-game.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { VideoGame } from './schemas/video-game.schema';
+import { VideoGame, VideoGameDocument } from './schemas/video-game.schema';
 import { VideoGameGenreEnum } from './enums/video-game-genre.enum';
 import { VideoGameSystemEnum } from './enums/video-game-system.enum';
 import { FilterVideoGameDto } from './dtos/filter-video-game.dto';
@@ -76,7 +76,7 @@ export class VideoGameService {
     return updated;
   }
 
-  async getVideoGameById(id: string): Promise<VideoGame> {
+  async getVideoGameById(id: string): Promise<VideoGameDocument> {
     const result = await this.videoGameModel.findById(id).exec();
     if (!result) {
       throw new NotFoundException(`Video game with id ${id} not found`);

@@ -188,7 +188,9 @@ export class RentalPackageService {
 
     query.sort({ createdAt: -1 });
 
-    const results = await query.populate('customer', 'customerName').exec();
+    const results = await query
+      .populate('customer', 'customerName phoneNumber')
+      .exec();
     if (results.length === 0) {
       throw new NotFoundException(
         `Rental Package Registeration cannot be found`,
