@@ -96,7 +96,39 @@ export class CustomerService {
     return updated;
   }
 
+  async checkCustomerReferenced(
+    id: string,
+    modelNames: string[],
+  ): Promise<boolean> {
+    const checkPromises = modelNames.map(async (modelName) => {
+      const model = this.customerModel.db.models[modelName];
+      if (!model) {
+        throw new Error(`Model with name '${modelName}' not found.`);
+      }
+      return model.countDocuments({ customer: id }).exec();
+    });
+    const counts = await Promise.all(checkPromises);
+
+    return counts.some((count) => count > 0);
+  }
+
   async deleteCustomer(id: string): Promise<void> {
+    // Check if the customer is referenced in other models
+    const isReferenced = await this.checkCustomerReferenced(id, [
+      'PreOrder',
+      'Rental',
+      'Return',
+      'Invoice',
+    ]);
+
+    if (isReferenced) {
+      // Handle the scenario where the customer is referenced in other models
+      throw new NotFoundException(
+        `Cannot delete customer with id ${id} because it is referenced in other models.`,
+      );
+    }
+
+    // If the customer is not referenced, proceed with deleting the customer
     const result = await this.getCustomerById(id);
     if (!result) {
       throw new NotFoundException(`Customer with id ${id} not found`);
