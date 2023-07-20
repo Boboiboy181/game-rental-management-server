@@ -73,7 +73,7 @@ export class PreOrderService {
 
       // calculate price by days
       const videoGamePrice = priceByDays(
-        videoGame,
+        videoGame.price,
         RentalDaysEnum[numberOfRentalDays],
       );
 

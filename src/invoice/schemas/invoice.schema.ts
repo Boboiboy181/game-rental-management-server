@@ -1,9 +1,9 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Schema as MongooseSchema } from 'mongoose';
-import { Customer } from 'src/customer/schemas/customer.schema';
+import { CustomerDocument } from 'src/customer/schemas/customer.schema';
 import { VideoGame } from 'src/video-game/schemas/video-game.schema';
 import { Voucher } from './voucher.schema';
-import { Return } from 'src/return/schemas/return.schema';
+import { ReturnDocument } from 'src/return/schemas/return.schema';
 
 export type InvoiceDocument = HydratedDocument<Invoice>;
 
@@ -13,7 +13,7 @@ export class Invoice {
   invoiceID: string;
 
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Customer' })
-  customer: Customer;
+  customer: CustomerDocument;
 
   @Prop([
     {
@@ -46,7 +46,7 @@ export class Invoice {
   finalPrice: number;
 
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Return' })
-  return: Return;
+  return: ReturnDocument;
 }
 
 export const InvoiceSchema = SchemaFactory.createForClass(Invoice);

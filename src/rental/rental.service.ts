@@ -95,7 +95,7 @@ export class RentalService {
 
       // calculate price by days
       const videoGamePrice = priceByDays(
-        videoGame,
+        videoGame.price,
         RentalDaysEnum[numberOfRentalDays],
       );
 
@@ -121,27 +121,27 @@ export class RentalService {
 
     const rentalDocument: RentalDocument = await rental.save();
 
-    await this.mailerService.sendMail({
-      to: rentalDocument.customer.email,
-      subject: 'Rental confirmation',
-      template: './rental-confirmation',
-      context: {
-        rentalCode: rentalDocument.rentalCode,
-        customerName: rentalDocument.customer.customerName,
-        email: rentalDocument.customer.email,
-        phoneNumber: rentalDocument.customer.phoneNumber,
-        rentedGames: rentalDocument.rentedGames.map((game) => {
-          return {
-            name: game.game.productName,
-            quantity: game.preOrderQuantity,
-            price: game.game.price,
-            rentalDays: game.numberOfRentalDays,
-            returnDate: formatDate(game.returnDate.toString()),
-          };
-        }),
-        totalPrice: rentalDocument.estimatedPrice,
-      },
-    });
+    // await this.mailerService.sendMail({
+    //   to: rentalDocument.customer.email,
+    //   subject: 'Rental confirmation',
+    //   template: './rental-confirmation',
+    //   context: {
+    //     rentalCode: rentalDocument.rentalCode,
+    //     customerName: rentalDocument.customer.customerName,
+    //     email: rentalDocument.customer.email,
+    //     phoneNumber: rentalDocument.customer.phoneNumber,
+    //     rentedGames: rentalDocument.rentedGames.map((game) => {
+    //       return {
+    //         name: game.game.productName,
+    //         quantity: game.preOrderQuantity,
+    //         price: game.game.price,
+    //         rentalDays: game.numberOfRentalDays,
+    //         returnDate: formatDate(game.returnDate.toString()),
+    //       };
+    //     }),
+    //     totalPrice: rentalDocument.estimatedPrice,
+    //   },
+    // });
 
     return rentalDocument;
   }
@@ -185,6 +185,19 @@ export class RentalService {
 
     if (!result) {
       throw new NotFoundException(`Rental with id ${id} not found`);
+    }
+    return result;
+  }
+
+  async getRentalByRentalCode(rentalCode: string): Promise<RentalDocument> {
+    const result = await this.rentalModel
+      .findOne({ rentalCode })
+      .populate('customer', 'customerName phoneNumber')
+      .populate('rentedGames.game', 'productName price')
+      .exec();
+
+    if (!result) {
+      throw new NotFoundException(`Rental with code ${rentalCode} not found`);
     }
     return result;
   }

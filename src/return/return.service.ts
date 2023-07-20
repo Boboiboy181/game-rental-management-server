@@ -12,6 +12,7 @@ import { ReturnStateEnum } from 'src/rental/enums/return-state.enum';
 import { FilterReturnDto } from './dtos/filter-return.dto';
 import { priceByDays } from 'src/utils/price-by-days';
 import { AutoCodeService } from '../auto-code/auto-code.service';
+import { RentalDocument } from '../rental/schemas/rental.schema';
 
 @Injectable()
 export class ReturnService {
@@ -73,7 +74,7 @@ export class ReturnService {
       });
 
       // calculate price by days
-      const videoGamePrice = priceByDays(videoGame, numberOfRentalDays);
+      const videoGamePrice = priceByDays(videoGame.price, numberOfRentalDays);
 
       return (
         videoGamePrice * preOrderQuantity * numberOfRentalDays + returnFine
@@ -117,6 +118,7 @@ export class ReturnService {
     query.setOptions({ lean: true });
     query.populate('customer', 'customerName phoneNumber');
     query.populate('rentedGames.game', 'productName price');
+    query.sort({ createdAt: -1 });
     return await query.exec();
   }
 
@@ -153,6 +155,35 @@ export class ReturnService {
     if (!result) {
       throw new NotFoundException(`Return ticket with id ${id} not found`);
     }
+
+    const rental: RentalDocument =
+      await this.rentalService.getRentalByRentalCode(result.rentalCode);
+
+    let countValue = 0;
+    const { rentedGames } = result;
+    for (const rentedGame of rentedGames) {
+      const { game, preOrderQuantity } = rentedGame;
+      countValue +=
+        priceByDays(game.price, rentedGame.numberOfRentalDays) *
+          preOrderQuantity +
+        rentedGame.fine;
+      const videoGame = await this.videoGameService.getVideoGameById(
+        game._id.toString(),
+      );
+      await this.videoGameService.updateProduct(game._id.toString(), {
+        quantity: videoGame.quantity - preOrderQuantity,
+      });
+    }
+    // update rental
+    await this.rentalService.updateRental(rental._id.toString(), {
+      returnState:
+        rental.returnIDs.filter((returnID) => returnID !== id).length === 0
+          ? ReturnStateEnum.NOT_RETURNED
+          : ReturnStateEnum.NOT_ENOUGH,
+      returnIDs: rental.returnIDs.filter((returnID) => returnID !== id),
+      returnValue: rental.returnValue - countValue,
+    });
+
     await this.returnlModel.deleteOne({ _id: id }).exec();
   }
 }

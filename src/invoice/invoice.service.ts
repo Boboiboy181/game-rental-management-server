@@ -33,7 +33,7 @@ export class InvoiceService {
       throw new Error('Customer with id ${id} not found');
     }
     // Logic cộng điểm tích lũy
-    const pointsEarned = Math.floor(transactionAmount / 50000); // Ví dụ: Mỗi 10,000 VNĐ giao dịch tích 5 điểm
+    const pointsEarned = Math.floor(transactionAmount / 10000); // Ví dụ: Mỗi 10,000 VNĐ giao dịch tích 5 điểm
 
     await this.customerService.updateCustomer(customerId, {
       point: customer.point + pointsEarned,
@@ -119,6 +119,9 @@ export class InvoiceService {
     // Check if the registration is still valid
     const isDateValid =
       latestRegisterRentalPackage.registrationEndDate >= createInvoceAt;
+
+    if (!isDateValid) return false;
+
     const numberOfRentedGames = rentedGames.reduce((acc, game) => {
       return acc + game.preOrderQuantity;
     }, 0);
@@ -127,6 +130,9 @@ export class InvoiceService {
     const remainingGame =
       latestRegisterRentalPackage.numberOfGameRemaining - numberOfRentedGames;
     const isQuantityValid = remainingGame > 0;
+
+    if (!isQuantityValid) return false;
+
     await this.rentalPackageService.updateRegistration(
       latestRegisterRentalPackage,
       {
@@ -150,6 +156,12 @@ export class InvoiceService {
       return: returnTicket,
     });
 
+    const registrationValid = await this.checkRegisterRentalPackage(
+      returnTicket.customer._id.toString(),
+      returnTicket.rentedGames,
+      new Date(),
+    );
+
     await this.returnService.updateReturnTicket(returnTicketID, {
       paymentState: PaymentStateEnum.PAID,
     });
@@ -168,14 +180,24 @@ export class InvoiceService {
       // price with voucher
       invoice.finalPrice =
         returnTicket.estimatedPrice * (1 - voucherValue * 0.01);
-    } else if (
-      await this.checkRegisterRentalPackage(
-        returnTicket.customer._id.toString(),
-        returnTicket.rentedGames,
-        new Date(),
-      )
-    ) {
+    } else if (registrationValid) {
       invoice.finalPrice = 0;
+      const registration =
+        await this.rentalPackageService.getRegistrationByCustomerID(
+          returnTicket.customer._id.toString(),
+        );
+      const latestRegistration = registration[0];
+      const numberOfRentedGames = returnTicket.rentedGames.reduce(
+        (acc, game) => {
+          return acc + game.preOrderQuantity;
+        },
+        0,
+      );
+      const remainingGame =
+        latestRegistration.numberOfGameRemaining - numberOfRentedGames;
+      await this.rentalPackageService.updateRegistration(latestRegistration, {
+        numberOfGameRemaining: remainingGame,
+      });
     } else {
       invoice.finalPrice = returnTicket.estimatedPrice;
     }
@@ -187,8 +209,6 @@ export class InvoiceService {
     );
 
     const invoiceDocument: InvoiceDocument = await invoice.save();
-
-    console.log(invoiceDocument);
 
     await this.mailerService.sendMail({
       to: invoiceDocument.customer.email,
@@ -220,6 +240,8 @@ export class InvoiceService {
       .find()
       .populate('customer', 'customerName phoneNumber point')
       .populate('rentedGames.game', 'productName price')
+      .populate('return', 'returnCode')
+      .sort({ createdAt: -1 })
       .exec();
     if (!result) {
       throw new NotFoundException(`Could not find invoice `);
@@ -227,11 +249,12 @@ export class InvoiceService {
     return result;
   }
 
-  async getInvoiceByID(id: string): Promise<Invoice> {
+  async getInvoiceByID(id: string): Promise<InvoiceDocument> {
     const result = await this.invoiceModel
       .findById(id)
-      .populate('customer', 'customerName email phoneNumber')
+      .populate('customer', 'customerName point email phoneNumber')
       .populate('rentedGames.game', 'productName price')
+      .populate('return', 'returnCode')
       .exec();
 
     if (!result) {
@@ -256,10 +279,59 @@ export class InvoiceService {
   }
 
   async deleteInvoice(id: string): Promise<void> {
-    const result = await this.getInvoiceByID(id);
+    const result: InvoiceDocument = await this.getInvoiceByID(id);
     if (!result) {
       throw new NotFoundException(`Could not find invoice with ${id}`);
     }
+
+    // update return ticket status
+    await this.returnService.updateReturnTicket(result.return._id.toString(), {
+      paymentState: PaymentStateEnum.NOT_PAID,
+    });
+
+    const { voucher } = result;
+    if (voucher) {
+      await this.customerService.updateCustomer(
+        result.customer._id.toString(),
+        {
+          point: result.customer.point + voucher.pointRequired,
+        },
+      );
+    }
+
+    // subtract point from customer based on the estimatedPrice
+    const returnTicket = await this.returnService.getReturnTicketById(
+      result.return._id.toString(),
+    );
+    const { estimatedPrice } = returnTicket;
+    const pointsEarned = Math.floor(estimatedPrice / 10000);
+
+    await this.customerService.updateCustomer(result.customer._id.toString(), {
+      point: returnTicket.customer.point - pointsEarned,
+    });
+
+    // update remaining game if the customer registration is still valid
+    const isRegistered = await this.checkRegisterRentalPackage(
+      result.customer._id.toString(),
+      result.rentedGames,
+      new Date(),
+    );
+    if (isRegistered) {
+      const registration =
+        await this.rentalPackageService.getRegistrationByCustomerID(
+          result.customer._id.toString(),
+        );
+      const latestRegistration = registration[0];
+      const numberOfRentedGames = result.rentedGames.reduce((acc, game) => {
+        return acc + game.preOrderQuantity;
+      }, 0);
+      const remainingGame =
+        latestRegistration.numberOfGameRemaining + numberOfRentedGames;
+      await this.rentalPackageService.updateRegistration(latestRegistration, {
+        numberOfGameRemaining: remainingGame,
+      });
+    }
+
     await this.invoiceModel.deleteOne({ _id: id }).exec();
   }
 }

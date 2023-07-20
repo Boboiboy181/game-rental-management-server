@@ -15,4 +15,8 @@ export class UpdateRentalDto extends PartialType(CreateRentalDto) {
   @IsOptional()
   @IsArray()
   returnIDs?: string[];
+
+  @IsOptional()
+  @IsNumber()
+  estimatedPrice?: number;
 }
