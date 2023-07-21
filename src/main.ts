@@ -10,6 +10,7 @@ async function bootstrap() {
     origin: [
       'http://localhost:5173',
       'https://game-rental-management-client.vercel.app',
+      'https://game-rental-management-client-dashboard.vercel.app',
     ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
