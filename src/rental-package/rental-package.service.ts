@@ -247,6 +247,6 @@ export class RentalPackageService {
     if (!result) {
       throw new NotFoundException(`Rental Package with id ${id} not found`);
     }
-    // await this.rentalPackageModel.deleteOne({ _id: id }).exec();
+    await this.rentalPackageModel.deleteOne({ _id: id }).exec();
   }
 }

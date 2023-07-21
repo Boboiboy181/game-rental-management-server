@@ -255,6 +255,7 @@ export class InvoiceService {
       .populate('customer', 'customerName point email phoneNumber')
       .populate('rentedGames.game', 'productName price')
       .populate('return', 'returnCode')
+      .populate('voucher', 'voucherName voucherCode voucherValue')
       .exec();
 
     if (!result) {
