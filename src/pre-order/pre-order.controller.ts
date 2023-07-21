@@ -1,12 +1,4 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Param,
-  Delete,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete } from '@nestjs/common';
 import { PreOrderService } from './pre-order.service';
 import { CreatePreOrderDto } from './dtos/create-pre-order.dto';
 import {
@@ -18,11 +10,10 @@ import {
 } from '@nestjs/swagger';
 import { PreOrder } from './schemas/pre-order.schema';
 import { RentalDaysEnum } from './enums/rental-days.enum';
-import { AuthGuard } from '@nestjs/passport';
+
 @ApiBearerAuth()
 @ApiTags('pre-order')
 @Controller('pre-order')
-@UseGuards(AuthGuard())
 export class PreOrderController {
   constructor(private readonly preOrderService: PreOrderService) {}
 
