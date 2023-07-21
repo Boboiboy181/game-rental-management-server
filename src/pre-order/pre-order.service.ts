@@ -14,6 +14,7 @@ import { VideoGameService } from 'src/video-game/video-game.service';
 import { MailerService } from '@nestjs-modules/mailer';
 import { priceByDays } from 'src/utils/price-by-days';
 import { AutoCodeService } from '../auto-code/auto-code.service';
+import { VideoGameDocument } from 'src/video-game/schemas/video-game.schema';
 
 @Injectable()
 export class PreOrderService {
@@ -64,6 +65,9 @@ export class PreOrderService {
           preOrderQuantity,
           numberOfRentalDays: RentalDaysEnum[numberOfRentalDays],
           returnDate,
+        });
+        await this.videoGameService.updateProduct(gameID, {
+          quantity: videoGame.quantity - preOrderQuantity,
         });
       } else {
         throw new BadRequestException(
@@ -148,6 +152,26 @@ export class PreOrderService {
     if (!result) {
       throw new NotFoundException(`Customer with id ${id} not found`);
     }
+
+    const rentedGames = result.rentedGames.map((rentedGame) => {
+      return {
+        gameID: rentedGame.game._id,
+        quantity: rentedGame.preOrderQuantity,
+      };
+    });
+
+    const updatePromises = rentedGames.map(async (rentedGame) => {
+      const gameID = rentedGame.gameID.toString();
+      const videoGame: VideoGameDocument =
+        await this.videoGameService.getVideoGameById(gameID);
+      const newQuantity = videoGame.quantity + rentedGame.quantity;
+      await this.videoGameService.updateProduct(gameID, {
+        quantity: newQuantity,
+      });
+    });
+
+    await Promise.all(updatePromises);
+
     await this.preOrderModel.deleteOne({ _id: id }).exec();
   }
 }

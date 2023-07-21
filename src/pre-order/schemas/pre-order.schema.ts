@@ -1,9 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Schema as MongooseSchema } from 'mongoose';
-import {
-  VideoGame,
-  VideoGameDocument,
-} from 'src/video-game/schemas/video-game.schema';
+import { VideoGameDocument } from 'src/video-game/schemas/video-game.schema';
 import { Customer } from 'src/customer/schemas/customer.schema';
 
 export type PreOrderDocument = HydratedDocument<PreOrder>;
@@ -40,4 +37,4 @@ export class PreOrder {
 export const PreOrderSchema = SchemaFactory.createForClass(PreOrder);
 
 // auto delete document after 6 hours
-PreOrderSchema.index({ createdAt: 1 }, { expireAfterSeconds: 21600 });
+PreOrderSchema.index({ createdAt: 1 }, { expireAfterSeconds: 10 });

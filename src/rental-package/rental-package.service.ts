@@ -214,11 +214,39 @@ export class RentalPackageService {
     return updatedpackage;
   }
 
+  async checkRentalPackageReferenced(
+    id: string,
+    modelNames: string[],
+  ): Promise<boolean> {
+    const checkPromises = modelNames.map(async (modelName) => {
+      const model = this.rentalPackageModel.db.models[modelName];
+      if (!model) {
+        throw new Error(`Model with name '${modelName}' not found.`);
+      }
+      return model.countDocuments({ rentalPackage: id }).exec();
+    });
+    const counts = await Promise.all(checkPromises);
+
+    return counts.some((count) => count > 0);
+  }
+
   async deleteRentalPackage(id: string): Promise<void> {
     const result = await this.getRentalPackageById(id);
+
+    const isReferenced = await this.checkRentalPackageReferenced(id, [
+      'RentalPackageRegistration',
+    ]);
+
+    if (isReferenced) {
+      // Handle the scenario where the customer is referenced in other models
+      throw new NotFoundException(
+        `Cannot delete customer with id ${id} because it is referenced in other models.`,
+      );
+    }
+
     if (!result) {
       throw new NotFoundException(`Rental Package with id ${id} not found`);
     }
-    await this.rentalPackageModel.deleteOne({ _id: id }).exec();
+    // await this.rentalPackageModel.deleteOne({ _id: id }).exec();
   }
 }

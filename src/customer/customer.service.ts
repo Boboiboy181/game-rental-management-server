@@ -119,6 +119,7 @@ export class CustomerService {
       'Rental',
       'Return',
       'Invoice',
+      'RentalPackageRegistration',
     ]);
 
     if (isReferenced) {
