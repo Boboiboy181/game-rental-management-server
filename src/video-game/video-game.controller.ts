@@ -8,7 +8,6 @@ import {
   Post,
   Query,
   UploadedFile,
-  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { VideoGameService } from './video-game.service';
@@ -27,12 +26,10 @@ import {
 } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
-import { AuthGuard } from '@nestjs/passport';
 
 @ApiBearerAuth()
 @ApiTags('video-game')
 @Controller('video-game')
-@UseGuards(AuthGuard())
 export class VideoGameController {
   constructor(
     private readonly videoGameService: VideoGameService,
@@ -77,6 +74,7 @@ export class VideoGameController {
       secure_url,
     );
   }
+
   // example of how to upload a file to cloudinary using the cloudinary service
   // @Post('/upload')
   // @UseInterceptors(FileInterceptor('file'))
