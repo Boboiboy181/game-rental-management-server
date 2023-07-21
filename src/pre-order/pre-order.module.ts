@@ -6,6 +6,7 @@ import { PreOrderSchema } from './schemas/pre-order.schema';
 import { VideoGameModule } from 'src/video-game/video-game.module';
 import { CustomerModule } from 'src/customer/customer.module';
 import { AutoCodeModule } from '../auto-code/auto-code.module';
+import { AuthModule } from 'src/auth/auth.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { AutoCodeModule } from '../auto-code/auto-code.module';
     VideoGameModule,
     CustomerModule,
     AutoCodeModule,
+    AuthModule,
   ],
   controllers: [PreOrderController],
   providers: [PreOrderService],

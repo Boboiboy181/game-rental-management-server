@@ -121,27 +121,27 @@ export class RentalService {
 
     const rentalDocument: RentalDocument = await rental.save();
 
-    // await this.mailerService.sendMail({
-    //   to: rentalDocument.customer.email,
-    //   subject: 'Rental confirmation',
-    //   template: './rental-confirmation',
-    //   context: {
-    //     rentalCode: rentalDocument.rentalCode,
-    //     customerName: rentalDocument.customer.customerName,
-    //     email: rentalDocument.customer.email,
-    //     phoneNumber: rentalDocument.customer.phoneNumber,
-    //     rentedGames: rentalDocument.rentedGames.map((game) => {
-    //       return {
-    //         name: game.game.productName,
-    //         quantity: game.preOrderQuantity,
-    //         price: game.game.price,
-    //         rentalDays: game.numberOfRentalDays,
-    //         returnDate: formatDate(game.returnDate.toString()),
-    //       };
-    //     }),
-    //     totalPrice: rentalDocument.estimatedPrice,
-    //   },
-    // });
+    await this.mailerService.sendMail({
+      to: rentalDocument.customer.email,
+      subject: 'Rental confirmation',
+      template: './rental-confirmation',
+      context: {
+        rentalCode: rentalDocument.rentalCode,
+        customerName: rentalDocument.customer.customerName,
+        email: rentalDocument.customer.email,
+        phoneNumber: rentalDocument.customer.phoneNumber,
+        rentedGames: rentalDocument.rentedGames.map((game) => {
+          return {
+            name: game.game.productName,
+            quantity: game.preOrderQuantity,
+            price: game.game.price,
+            rentalDays: game.numberOfRentalDays,
+            returnDate: formatDate(game.returnDate.toString()),
+          };
+        }),
+        totalPrice: rentalDocument.estimatedPrice,
+      },
+    });
 
     return rentalDocument;
   }

@@ -7,6 +7,7 @@ import { RentalModule } from 'src/rental/rental.module';
 import { VideoGameModule } from 'src/video-game/video-game.module';
 import { CustomerModule } from 'src/customer/customer.module';
 import { AutoCodeModule } from '../auto-code/auto-code.module';
+import { AuthModule } from 'src/auth/auth.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { AutoCodeModule } from '../auto-code/auto-code.module';
     RentalModule,
     CustomerModule,
     AutoCodeModule,
+    AuthModule,
   ],
   controllers: [ReturnController],
   providers: [ReturnService],

@@ -7,21 +7,26 @@ import {
   Patch,
   Post,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { RentalService } from './rental.service';
 import { CreateRentalDto } from './dtos/create-rental.dto';
 import { UpdateRentalDto } from './dtos/update-rental.dto';
 import { Rental } from './schemas/rental.schema';
 import {
+  ApiBearerAuth,
   ApiCreatedResponse,
   ApiOkResponse,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
 import { FilterRentalDto } from './dtos/filter-rental.dto';
+import { AuthGuard } from '@nestjs/passport';
 
+@ApiBearerAuth()
 @ApiTags('rental')
 @Controller('rental')
+@UseGuards(AuthGuard())
 export class RentalController {
   constructor(private readonly rentalService: RentalService) {}
 

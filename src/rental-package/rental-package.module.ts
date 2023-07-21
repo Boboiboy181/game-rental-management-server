@@ -5,6 +5,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { RentalPackageSchema } from './schemas/rental-package.schema';
 import { RentalPackageRegistrationSchema } from './schemas/rental-package-registration.schema';
 import { CustomerModule } from 'src/customer/customer.module';
+import { AuthModule } from 'src/auth/auth.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { CustomerModule } from 'src/customer/customer.module';
       },
     ]),
     CustomerModule,
+    AuthModule,
   ],
   controllers: [RentalPackageController],
   providers: [RentalPackageService],

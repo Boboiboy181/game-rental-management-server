@@ -16,6 +16,7 @@ async function bootstrap() {
   });
   // Configuration for Swagger
   const config = new DocumentBuilder()
+    .addBearerAuth()
     .setTitle('Video game management API')
     .setDescription('Video Game API description')
     .setVersion('1.0')

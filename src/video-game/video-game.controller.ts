@@ -8,6 +8,7 @@ import {
   Post,
   Query,
   UploadedFile,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { VideoGameService } from './video-game.service';
@@ -16,6 +17,7 @@ import { UpdateVideoGameDto } from './dtos/update-video-game.dto';
 import { VideoGame } from './schemas/video-game.schema';
 import { FilterVideoGameDto } from './dtos/filter-video-game.dto';
 import {
+  ApiBearerAuth,
   ApiBody,
   ApiConsumes,
   ApiCreatedResponse,
@@ -25,9 +27,12 @@ import {
 } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
+import { AuthGuard } from '@nestjs/passport';
 
+@ApiBearerAuth()
 @ApiTags('video-game')
 @Controller('video-game')
+@UseGuards(AuthGuard())
 export class VideoGameController {
   constructor(
     private readonly videoGameService: VideoGameService,

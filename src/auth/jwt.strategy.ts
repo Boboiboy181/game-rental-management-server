@@ -5,6 +5,7 @@ import { ConfigService } from '@nestjs/config';
 import { User } from './schema/users.schemas';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
+
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(
@@ -22,6 +23,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     const { username } = user;
     const findUser: User = await this.userModel.findOne({ username }).exec();
     if (!findUser) {
+      console.log('hello');
       throw new UnauthorizedException();
     }
     return findUser;

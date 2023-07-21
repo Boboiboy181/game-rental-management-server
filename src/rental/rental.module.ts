@@ -9,6 +9,7 @@ import { VideoGameService } from '../video-game/video-game.service';
 import { CustomerService } from '../customer/customer.service';
 import { PreOrderModule } from '../pre-order/pre-order.module';
 import { AutoCodeModule } from '../auto-code/auto-code.module';
+import { AuthModule } from 'src/auth/auth.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { AutoCodeModule } from '../auto-code/auto-code.module';
     CustomerModule,
     PreOrderModule,
     AutoCodeModule,
+    AuthModule,
   ],
   controllers: [RentalController],
   providers: [RentalService, VideoGameService, CustomerService],

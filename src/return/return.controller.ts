@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { ReturnService } from './return.service';
 import { CreateReturnDto } from './dtos/create-return.dto';
@@ -14,14 +15,18 @@ import { UpdateReturnDto } from './dtos/update-return.dto';
 import { FilterReturnDto } from './dtos/filter-return.dto';
 import { Return } from './schemas/return.schema';
 import {
+  ApiBearerAuth,
   ApiCreatedResponse,
   ApiOkResponse,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { AuthGuard } from '@nestjs/passport';
 
+@ApiBearerAuth()
 @ApiTags('return')
 @Controller('return')
+@UseGuards(AuthGuard())
 export class ReturnController {
   constructor(private readonly returnService: ReturnService) {}
 

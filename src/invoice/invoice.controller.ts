@@ -6,20 +6,25 @@ import {
   Patch,
   Param,
   Delete,
+  UseGuards,
 } from '@nestjs/common';
 import { InvoiceService } from './invoice.service';
 import { CreateInvoiceDto } from './dtos/create-invoice.dto';
 import { UpdateInvoiceDto } from './dtos/update-invoice.dto';
 import { Invoice } from './schemas/invoice.schema';
 import {
+  ApiBearerAuth,
   ApiCreatedResponse,
   ApiOkResponse,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { AuthGuard } from '@nestjs/passport';
 
+@ApiBearerAuth()
 @ApiTags('invoice')
 @Controller('invoice')
+@UseGuards(AuthGuard())
 export class InvoiceController {
   constructor(private readonly invoiceService: InvoiceService) {}
 
