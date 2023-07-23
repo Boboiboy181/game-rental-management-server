@@ -11,6 +11,7 @@ async function bootstrap() {
       'http://localhost:5173',
       'https://game-rental-management-client.vercel.app',
       'https://game-rental-management-client-dashboard.vercel.app',
+      'https://react-ant--elegant-croquembouche-112f48.netlify.app',
     ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
