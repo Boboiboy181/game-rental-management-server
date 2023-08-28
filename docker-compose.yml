@@ -1,0 +1,24 @@
+version: '3.9'
+
+services:
+  game-rental-server:
+    container_name: game-rental-server
+    image: daogiahai/game-rental-server:1.0.0
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - MONGO_URI=${MONGO_URI}
+        # JWT
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXPIRES=${JWT_EXPIRES}
+        # CLOUDINARY
+      - CLOUDINARY_NAME=${CLOUDINARY_NAME}
+      - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
+      - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
+        # SMTP
+      - SMTP_HOST=${SMTP_HOST}
+      - SMTP_USERNAME=${SMTP_USERNAME}
+      - SMTP_PASSWORD=${SMTP_PASSWORD}
+      - SMTP_MAIL_FROM=${SMTP_USERNAME}
+      - SMTP_MAIL_TRANSPORT=${SMTP_MAIL_TRANSPORT}
