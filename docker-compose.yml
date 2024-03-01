@@ -3,10 +3,10 @@ version: '3.9'
 services:
   game-rental-server:
     container_name: game-rental-server
-    image: daogiahai/game-rental-server:1.0.0
+    image: daogiahai/game-rental-server:latest
     build: .
     ports:
-      - "3000:3000"
+      - '3000:3000'
     environment:
       - MONGO_URI=${MONGO_URI}
         # JWT
