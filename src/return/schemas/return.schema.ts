@@ -1,10 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Schema as MongooseSchema } from 'mongoose';
 import { CustomerDocument } from 'src/customer/schemas/customer.schema';
-import {
-  VideoGame,
-  VideoGameDocument,
-} from 'src/video-game/schemas/video-game.schema';
+import { VideoGameDocument } from 'src/video-game/schemas/video-game.schema';
 import { PaymentStateEnum } from '../enum/payment-state.enum';
 
 export type ReturnDocument = HydratedDocument<Return>;

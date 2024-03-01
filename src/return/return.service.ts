@@ -112,8 +112,7 @@ export class ReturnService {
     return returnDocument;
   }
 
-  async getReturnTicket(filterReturnDto: FilterReturnDto): Promise<Return[]> {
-    const { phoneNumber, name } = filterReturnDto;
+  async getReturnTicket(_filterReturnDto: FilterReturnDto): Promise<Return[]> {
     const query = this.returnlModel.find();
     query.setOptions({ lean: true });
     query.populate('customer', 'customerName phoneNumber');

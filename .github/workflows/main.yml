@@ -4,12 +4,25 @@ on:
     branches:
       - master
 jobs:
-  docker:
-    name: Build and Push Docker Image
+  lint:
+    name: Check code linting
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+      - name: Load & cache dependencies
+        uses: ./.github/actions/cached-deps
+      - name: Run lint
+        run: npm run lint
+  docker:
+    name: Build and Push Docker Image
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Load & cache dependencies
+        uses: ./.github/actions/cached-deps
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
       - name: Set up Docker Buildx
@@ -25,3 +38,18 @@ jobs:
           context: .
           push: true
           tags: daogiahai/game-rental-management-server:latest
+  deploy:
+    name: Deploy to AWS EC2 instance
+    runs-on: ubuntu-latest
+    needs: [docker]
+    steps:
+      - name: SSH into EC2 instance and deploy
+        run: |
+          ssh -i ${{ secrets.PRIVATE_KEY }} ${{ secrets.PUBLIC_DNS }} "
+            echo Connected to EC2 instance &&
+            docker pull daogiahai/game-rental-management-server:latest &&
+            docker stop game-rental-management-server &&
+            docker rm game-rental-management-server &&
+            docker-compose -f /home/ubuntu/game-rental-management-server/docker-compose.yml up -d &&
+            docker image prune -f &&
+            echo 'Server is running at ${{ secrets.PUBLIC_DNS }}:3000'"

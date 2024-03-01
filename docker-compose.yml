@@ -1,9 +1,9 @@
-version: '3.9'
+version: latest
 
 services:
-  game-rental-server:
-    container_name: game-rental-server
-    image: daogiahai/game-rental-server:latest
+  game-rental-management-server:
+    container_name: game-rental-management-server
+    image: daogiahai/game-rental-management-server:latest
     build: .
     ports:
       - '3000:3000'
