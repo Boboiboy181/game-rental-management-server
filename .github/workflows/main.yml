@@ -50,10 +50,10 @@ jobs:
       - name: Create private key
         run: |
           echo "$PRIVATE_KEY" > private_key.pem && chmod 600 private_key.pem
-          cat private_key.pem
+          ls
       - name: Connect to EC2 instance
         run: |
-          ssh -o StrictHostKeyChecking=no -i private_key.pem "$PUBLIC_DNS" "echo Connected to EC2 instance"
+          ssh -i "private_key.pem" "$PUBLIC_DNS" "echo Connected to EC2 instance"
       - name: Connect to EC2 and Deploy
         run: |
           echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
