@@ -56,8 +56,6 @@ jobs:
           ssh -o StrictHostKeyChecking=no -i private_key ec2-user@ec2-3-0-148-21.ap-southeast-1.compute.amazonaws.com "
           echo Connected to EC2 instance &&
           docker pull daogiahai/game-rental-management-server:latest &&
-          docker stop game-rental-management-server &&
-          docker rm game-rental-management-server &&
           docker-compose -f /home/ubuntu/game-rental-management-server/docker-compose.yml up -d &&
           docker image prune -f &&
           echo 'Server is running at ${{ secrets.PUBLIC_DNS }}:3000'"
