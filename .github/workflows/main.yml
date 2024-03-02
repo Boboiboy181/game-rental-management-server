@@ -47,7 +47,7 @@ jobs:
       PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
       PUBLIC_DNS: ${{ secrets.PUBLIC_DNS }}
     steps:
-      - name: Create PEM file
+      - name: Create private key
         run: |
           echo "$PRIVATE_KEY" > private_key.pem && chmod 600 private_key.pem
       - name: Connect to EC2 instance
