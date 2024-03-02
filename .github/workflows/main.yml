@@ -47,21 +47,30 @@ jobs:
       PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
       PUBLIC_DNS: ${{ secrets.PUBLIC_DNS }}
     steps:
-      - name: Create private key
-        run: |
-          echo "$PRIVATE_KEY" > private_key.pem && chmod 600 private_key.pem
-          ls
-      - name: Connect to EC2 instance
-        run: |
-          ssh -i "private_key.pem" ec2-user@ec2-3-0-148-21.ap-southeast-1.compute.amazonaws.com "echo Connected to EC2 instance"
-      - name: Connect to EC2 and Deploy
-        run: |
-          echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
-          # ssh -o StrictHostKeyChecking=no -i private_key "$PUBLIC_DNS" "
-          #   echo Connected to EC2 instance &&
-          #   docker pull daogiahai/game-rental-management-server:latest &&
-          #   docker stop game-rental-management-server &&
-          #   docker rm game-rental-management-server &&
-          #   docker-compose -f /home/ubuntu/game-rental-management-server/docker-compose.yml up -d &&
-          #   docker image prune -f &&
-          #   echo 'Server is running at ${{ secrets.PUBLIC_DNS }}:3000'"
+      - name: Install SSH Key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.PRIVATE_KEY }}
+          known_hosts: 'just-a-placeholder-so-we-dont-get-errors'
+      - name: Adding Known Hosts
+        run: ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+      - name: Output the result
+        run: echo "Connected"
+      # - name: Create private key
+      #   run: |
+      #     echo "$PRIVATE_KEY" > private_key.pem && chmod 400 private_key.pem
+      #     ls
+      # - name: Connect to EC2 instance
+      #   run: |
+      #     ssh -i "private_key.pem" ec2-user@ec2-3-0-148-21.ap-southeast-1.compute.amazonaws.com "echo Connected to EC2 instance"
+      # - name: Connect to EC2 and Deploy
+      #   run: |
+      # echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
+      # ssh -o StrictHostKeyChecking=no -i private_key "$PUBLIC_DNS" "
+      #   echo Connected to EC2 instance &&
+      #   docker pull daogiahai/game-rental-management-server:latest &&
+      #   docker stop game-rental-management-server &&
+      #   docker rm game-rental-management-server &&
+      #   docker-compose -f /home/ubuntu/game-rental-management-server/docker-compose.yml up -d &&
+      #   docker image prune -f &&
+      #   echo 'Server is running at ${{ secrets.PUBLIC_DNS }}:3000'"
