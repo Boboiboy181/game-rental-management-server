@@ -47,6 +47,12 @@ jobs:
       PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
       PUBLIC_DNS: ${{ secrets.PUBLIC_DNS }}
     steps:
+      - name: Create PEM file
+        run: |
+          echo "$PRIVATE_KEY" > private_key.pem && chmod 600 private_key.pem
+      - name: Connect to EC2 instance
+        run: |
+          ssh -i private_key.pem ec2-user@your_ec2_instance_ip_or_hostname "echo Connected to EC2 instance"
       - name: Connect to EC2 and Deploy
         run: |
           echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
@@ -58,6 +64,3 @@ jobs:
           #   docker-compose -f /home/ubuntu/game-rental-management-server/docker-compose.yml up -d &&
           #   docker image prune -f &&
           #   echo 'Server is running at ${{ secrets.PUBLIC_DNS }}:3000'"
-      - name: Test private_key
-        run: |
-          echo private_key
