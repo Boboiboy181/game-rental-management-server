@@ -53,7 +53,7 @@ jobs:
           ls
       - name: Connect to EC2 instance
         run: |
-          ssh -i "private_key.pem" "$PUBLIC_DNS" "echo Connected to EC2 instance"
+          ssh -i "private_key.pem" ec2-user@ec2-3-0-148-21.ap-southeast-1.compute.amazonaws.com "echo Connected to EC2 instance"
       - name: Connect to EC2 and Deploy
         run: |
           echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
